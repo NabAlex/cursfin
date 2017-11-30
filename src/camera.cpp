@@ -1,8 +1,5 @@
 #include "camera.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 Camera::~Camera()
 {}
 
@@ -23,7 +20,6 @@ Camera::Camera(const Dot &eye, const Dot &center, const Dot &up, double XZangle,
     this->near = near;
     
     ReCalcMatrix();
-    
 }
 
 void Camera::SetActive(Model* Model) {

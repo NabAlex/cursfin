@@ -1,4 +1,6 @@
 #include "util.h"
 
-Model::~Model()
-{}
+Vec3i dtovec3i(Dot d)
+{
+    return Vec3i((int) d.x, (int) d.y, (int) d.z);
+}

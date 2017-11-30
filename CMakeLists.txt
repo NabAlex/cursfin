@@ -12,12 +12,18 @@ link_directories(${GTKMM_LIBRARY_DIRS})
 include_directories(${GTKMM_INCLUDE_DIRS})
 
 set(SOURCE_FILES main.cpp
-        include/draw.h
-        src/draw.cpp
+        include/scen_controller.h
+        src/scen_controller.cpp
         include/camera.h
         src/camera.cpp
         include/util.h
-        src/util.cpp)
+        src/util.cpp
+        include/creator.h
+        src/creator.cpp
+        include/easy_scen_controller.h
+        src/easy_scen_controller.cpp
+        include/renderer.h
+        src/renderer.cpp)
 
 add_executable(cursfin ${SOURCE_FILES})
 target_link_libraries(cursfin

@@ -2,6 +2,7 @@
 #define CURSFIN_CAMERA_H
 
 #include <vector>
+#include <math.h>
 
 #include "util.h"
 
@@ -36,8 +37,11 @@ public:
     
     void Transform();
     void MultiDot(Dot &V, double matrix[4][4]);
+    
     void MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[4][4]));
+    
     Dot MultiVect(const Dot &A, const Dot &B);
+    
     void Reverse(double matr[4][4]);
     void CameraPort(Dot &target);
     void PProjection(Dot &target);
@@ -46,11 +50,14 @@ public:
     void SetScreenMatrix();
     void ReCalcMatrix();
     void ToScreen(Dot &target);
+    
     void MoveTo(double x, double y, double z);
     void MoveOn(double dx, double dy, double dz);
+    
     void RotateX(double phi);
     void RotateY(double phi);
     void RotateZ(double phi);
+    
     double getFar();
     double getNear();
 };
