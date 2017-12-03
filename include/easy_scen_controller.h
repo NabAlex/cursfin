@@ -5,14 +5,17 @@
 
 #include "scen_controller.h"
 
-class EasyScenController : public ScenController
+class EasySceneController : public SceneController
 {
 public:
-    EasyScenController();
-    virtual ~EasyScenController();
+    EasySceneController(int width, int height);
+    virtual ~EasySceneController();
     
     bool on_key_press(GdkEventKey* event);
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+    void on_update() override;
+
+private:
+    Creator creator;
 };
 
 #endif //CURSFIN_EASY_SCEN_CONTROLLER_H

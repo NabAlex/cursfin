@@ -6,35 +6,105 @@
 
 using namespace std;
 
-struct Dot {
-    Dot(double x, double y, double z) {
+/* work with COLOR */
+#define COLOR_EXPAND(obj)   (obj).r, (obj).g, (obj).b
+
+#define COLOR_BLACK         0.0, 0.0, 0.0
+#define COLOR_RED           1.0, 0.0, 0.0
+#define COLOR_GREEN         0.0, 1.0, 0.0
+#define COLOR_BLUE          0.0, 0.0, 1.0
+#define COLOR_WHITE         1.0, 1.0, 1.0
+
+/* COLOR */
+
+struct Color
+{
+    Color(double r, double g, double b)
+    {
+        this->r = r;
+        this->g = g;
+        this->b = b;
+    }
+    
+    Color(const Color &c)
+    {
+        this->r = c.r;
+        this->g = c.g;
+        this->b = c.b;
+    }
+    
+    Color()
+    {
+        this->r = 0.0;
+        this->g = 0.0;
+        this->b = 0.0;
+    }
+    
+    Color *clone()
+    {
+        return new Color(*this);
+    }
+    
+    double r;
+    double g;
+    double b;
+};
+
+struct Point
+{
+    Point(double x, double y, double z)
+    {
         this->x = x;
         this->y = y;
         this->z = z;
+        this->w = 1;
     }
-    Dot() : x(0), y(0), z(0), w(1) {};
+    
+    Point(double x, double y, double z, Color *color)
+    {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+        this->w = 1;
+    }
+    
+    Point() : x(0), y(0), z(0), w(1) {};
+    
+    ~Point()
+    {}
+    
+    Point(const Point &p)
+    {
+        this->x = p.x;
+        this->y = p.y;
+        this->z = p.z;
+        this->w = p.w;
+    }
+    
     double x;
     double y;
     double z;
-    double w = 1;
-    struct Dot operator - (const Dot &point) {
-        Dot temp;
+    double w;
+    
+    struct Point operator -(const Point &point) {
+        Point temp;
         temp.x = this->x - point.x;
         temp.y = this->y - point.y;
         temp.z = this->z - point.z;
         temp.w = 1;
         return temp;
     }
-    struct Dot operator + (const Dot &point) {
-        Dot temp;
+    
+    struct Point operator +(const Point &point) {
+        Point temp;
         temp.x = this->x + point.x;
         temp.y = this->y + point.y;
         temp.z = this->z + point.z;
         temp.w = 1;
         return temp;
     }
-    struct Dot operator * (const double &point) {
-        Dot temp;
+    struct Point operator *(const double &point) {
+        Point temp;
         temp.x = this->x * point;
         temp.y = this->y * point;
         temp.z = this->z * point;
@@ -42,38 +112,48 @@ struct Dot {
         return temp;
     }
     
-    bool operator == (const Dot &point) {
-        if (
-            point.x != this->x ||
-                point.y != this->y ||
-                point.z != this->z
-            ) return false;
-        return true;
+    bool operator ==(const Point &point) {
+        return !(point.x != this->x ||
+            point.y != this->y ||
+            point.z != this->z);
     }
     
     
     
     void normalize() {
-        double L = sqrt(x*x+y*y+z*z);
+        double L = sqrt(x * x + y * y + z * z);
         x /= L;
         y /= L;
         z /= L;
     }
 };
 
+class Line
+{
+public:
+    Line(Point v1, Point v2);
+    Line(Point v1, Point v2, Color color);
+    ~Line();
+    
+    Line(const Line &l);
+
+    Point v1, v2;
+    Color color;
+};
+
 class Model
 {
 private:
-    vector <Dot> vertex;
+    vector <Point> vertex;
     vector <vector<int>> connections;
     
-    vector <Dot> tex_vertex;
+    vector <Point> tex_vertex;
     vector <vector<int>> tex_connections;
 public:
     Model() = default;
     ~Model() {}
     
-    bool addVertex(Dot dot)
+    bool addVertex(Point dot)
     {
         this->vertex.push_back(dot);
         return true;
@@ -96,27 +176,27 @@ public:
         return true;
     }
     
-    vector <Dot>* getVertex()
+    vector<Point>* getVertex()
     {
         return &vertex;
     }
     
-    vector <vector<int>>* getConnections()
+    vector<vector<int>>* getConnections()
     {
         return &connections;
     }
     
-    vector <Dot>* getTexVertex()
+    vector<Point>* getTexVertex()
     {
         return &tex_vertex;
     }
     
-    vector <vector<int>>* getTexConnections()
+    vector<vector<int>>* getTexConnections()
     {
         return &tex_connections;
     }
     
-    inline Dot getNode(int index)
+    inline Point getNode(int index)
     {
         return vertex[index];
     }
@@ -173,6 +253,6 @@ typedef Vec3<float> Vec3f;
 typedef Vec3<int>   Vec3i;
 
 /* util func */
-Vec3i dtovec3i(Dot d);
+Vec3i dtovec3i(Point d);
 
 #endif //CURSFIN_UTIL_H

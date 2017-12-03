@@ -13,7 +13,10 @@ public:
     
     void Generate();
     Model *GetModel();
+    
+    bool isGenerated();
 private:
+    bool generated;
     Model *m;
 };
 

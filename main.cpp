@@ -14,10 +14,12 @@ public:
     ~MainWindow()
     {}
     
-    void addController(ScenController& controller)
+    void addController(SceneController& controller)
     {
-        Gtk::Window::add(controller);
-        controllers.push_back(std::shared_ptr<ScenController>(&controller));
+        this->add(controller);
+        controller.show();
+        
+        controllers.push_back(std::shared_ptr<SceneController>(&controller));
     }
     
     bool on_key_press_event(GdkEventKey* key_event)
@@ -28,19 +30,20 @@ public:
         return Gtk::Window::on_key_press_event(key_event);
     }
 private:
-    std::vector<std::shared_ptr<ScenController>> controllers;
+    std::vector<std::shared_ptr<SceneController>> controllers;
 };
 
 int main(int argc, char *argv[])
 {
+    const unsigned int w = 800, h = 800;
+    
     auto app = Gtk::Application::create(argc, argv, "org.gtkmm.example");
     
     MainWindow window;
-    window.set_default_size(200, 200);
+    window.set_default_size(w, h);
     
-    EasyScenController main_scen;
+    EasySceneController main_scen(w, h);
     window.addController(main_scen);
-    main_scen.show();
     
     return app->run(window);
 }

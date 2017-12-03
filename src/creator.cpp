@@ -1,8 +1,8 @@
 #include <creator.h>
 
-static Dot generate_vertex()
+static Point generate_vertex()
 {
-    return Dot(rand() % 100, rand() % 100, rand() % 100);
+    return Point(rand() % 10, rand() % 10, rand() % 10);
 }
 
 Creator::Creator(unsigned int seed)
@@ -23,9 +23,16 @@ void Creator::Generate()
     int c[] = {0, 1, 2};
     raw->addConnection(c, 3);
     this->m = raw;
+    
+    generated = true;
 }
 
 Model *Creator::GetModel()
 {
     return this->m;
+}
+
+bool Creator::isGenerated()
+{
+    return this->generated;
 }

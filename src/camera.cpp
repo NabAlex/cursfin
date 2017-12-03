@@ -3,17 +3,14 @@
 Camera::~Camera()
 {}
 
-Camera::Camera(const Dot &eye, const Dot &center, const Dot &up, double XZangle, double YZangle, double far, double near, int height, int weight)
+Camera::Camera(const Point &eye, const Point &center, const Point &up, double XZangle, double YZangle, double far, double near, int w, int h)
 {
-    Vertex = nullptr;
-    Connections = nullptr;
-    
     Eye = eye;
     Center = center;
     Up = up;
     
-    Width = weight;
-    Heigth = height;
+    width = w;
+    heigth = h;
     this->XZangle = XZangle;
     this->YZangle = YZangle;
     this->far = far;
@@ -22,23 +19,15 @@ Camera::Camera(const Dot &eye, const Dot &center, const Dot &up, double XZangle,
     ReCalcMatrix();
 }
 
-void Camera::SetActive(Model* Model) {
-    Vertex = Model->getVertex();
-    Connections = Model->getConnections();
+Point Camera::Transform(Point &dot)
+{
+    Point result = dot;
+    CameraPort(result);
+    PProjection(result);
+    ToScreen(result);
+    
+    return result;
 }
-
-
-void Camera::Transform() {
-    int g = 9;
-    Dot *target;
-    for (int i = 0, N = Vertex->size(); i < N; i++) {
-        target = &(*Vertex)[i];
-        CameraPort(*target);
-        PProjection(*target);
-        ToScreen(*target);
-    }
-}
-
 
 void Camera::Reverse(double matr[4][4]) {
     double det = matr[0][0] * matr[1][1] * matr[2][2] - matr[0][0] * matr[1][2] * matr[2][1]
@@ -67,8 +56,8 @@ void Camera::MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[
 }
 
 
-void Camera::MultiDot(Dot &V, double matrix[4][4]) {
-    Dot new_dot = V;
+void Camera::MultiDot(Point &V, double matrix[4][4]) {
+    Point new_dot = V;
     new_dot.x = matrix[0][0] * V.x + matrix[1][0] * V.y + matrix[2][0] * V.z + matrix[3][0] * V.w;
     new_dot.y = matrix[0][1] * V.x + matrix[1][1] * V.y + matrix[2][1] * V.z + matrix[3][1] * V.w;
     new_dot.z = matrix[0][2] * V.x + matrix[1][2] * V.y + matrix[2][2] * V.z + matrix[3][2] * V.w;
@@ -82,7 +71,7 @@ void Camera::SetPProjMatrix() {
     double right = tan(hfou / 2);
     double left = -right;
     
-    double aspect = double(Width) / Heigth;
+    double aspect = double(width) / heigth;
     
     double ufou = YZangle / 180 * M_PI;
     double top = tan(ufou / 2);
@@ -94,39 +83,37 @@ void Camera::SetPProjMatrix() {
     ViewPort[2][1] = (top + bottom) / (bottom - top);
     ViewPort[2][2] = (far + near) / (far - near);
     ViewPort[2][3] = 1;
-    ViewPort[3][2] = -2.*near*far / (far - near);
+    ViewPort[3][2] = -2. * near * far / (far - near);
 }
 
 
-void Camera::CameraPort(Dot &target) {
+void Camera::CameraPort(Point &target) {
     
     target.x -= Eye.x;
     target.y -= Eye.y;
     target.z -= Eye.z;
     
     MultiDot(target, Minv);
-    
 }
 
 
-Dot Camera::MultiVect(const Dot &A, const Dot &B) {
-    Dot Temp;
+Point Camera::MultiVect(const Point &A, const Point &B) {
+    Point Temp;
     Temp.x = A.y*B.z - A.z*B.y;
     Temp.y = A.z*B.x - A.x*B.z;
     Temp.z = A.x*B.y - A.y*B.x;
     return Temp;
 }
 
-
 void Camera::SetViewMatrix() {
-    Dot VectZ = (Center - Eye);
-    VectZ.normalize();  // ���������� �������
+    Point VectZ = (Center - Eye);
+    VectZ.normalize();
     
-    Dot VectX = MultiVect(Up, VectZ);
+    Point VectX = MultiVect(Up, VectZ);
     VectX.normalize();
     
-    Dot VectY = MultiVect(VectZ, VectX);
-    VectY.normalize(); //�����
+    Point VectY = MultiVect(VectZ, VectX);
+    VectY.normalize();
     
     Minv[0][0] = VectX.x;
     Minv[1][0] = VectX.y;
@@ -139,8 +126,6 @@ void Camera::SetViewMatrix() {
     Minv[0][2] = VectZ.x;
     Minv[1][2] = VectZ.y;
     Minv[2][2] = VectZ.z;
-    
-    
 }
 
 
@@ -151,60 +136,57 @@ void Camera::ReCalcMatrix() {
 }
 
 
-void Camera::PProjection(Dot &target) {
+void Camera::PProjection(Point &target) {
     MultiDot(target, ViewPort);
     
     target.w = abs(target.w);
     
     target.x /= target.w;
     target.y /= target.w;
-    //target.z /= target.w;
-    target.w /= target.w;
+    target.z /= target.w;
+    target.w = 1;
 }
 
-
 void  Camera::SetScreenMatrix() {
-    Screen[0][0] = double(Width - 1) / 2;
-    Screen[1][1] = double(Heigth - 1) / 2;
+    Screen[0][0] = double(width - 1) / 2;
+    Screen[1][1] = double(heigth - 1) / 2;
     Screen[2][2] = 1;
-    Screen[3][0] = double(Width - 1) / 2;
-    Screen[3][1] = double(Heigth - 1) / 2;
+    Screen[3][0] = double(width - 1) / 2;
+    Screen[3][1] = double(heigth - 1) / 2;
     Screen[3][3] = 1;
 }
 
 
-void  Camera::ToScreen(Dot &target) {
+void  Camera::ToScreen(Point &target) {
     MultiDot(target, Screen);
 }
 
 void Camera::MoveTo(double x, double y, double z) {
-    Center = Dot(x + Center.x - Eye.x, y + Center.y - Eye.y, z + Center.z - Eye.z);
-    Eye = Dot(x, y, z);
+    Center = Point(x + Center.x - Eye.x, y + Center.y - Eye.y, z + Center.z - Eye.z);
+    Eye = Point(x, y, z);
     SetViewMatrix();
-    
-    //Transform();
 }
 
 void Camera::MoveOn(double dx, double dy, double dz) {
-    Dot VectZ = (Center - Eye);
+    Point VectZ = (Center - Eye);
     VectZ.normalize();
     
-    Dot VectX = MultiVect(Up, VectZ);
+    Point VectX = MultiVect(Up, VectZ);
     VectX.normalize();
     
-    Dot VectY = MultiVect(VectZ, VectX);
+    Point VectY = MultiVect(VectZ, VectX);
     VectY.normalize();
     
     VectY = VectY * dy;
     VectX = VectX * dx;
     VectZ = VectZ * dz;
     
-    Dot Vect = VectX + VectY + VectZ;
+    Point Vect = VectX + VectY + VectZ;
     
     Eye = Eye + Vect;
     Center = Center + Vect;
     
-    //Transform();
+    ReCalcMatrix();
 }
 
 void Camera::RotateX(double phi) {
@@ -227,7 +209,6 @@ void Camera::RotateX(double phi) {
     MultiDot(Up, matrix);
     
     SetViewMatrix();
-    //Transform();
 }
 
 void Camera::RotateY(double phi) {
@@ -249,10 +230,7 @@ void Camera::RotateY(double phi) {
     
     MultiDot(Up, matrix);
     
-    
-    
     SetViewMatrix();
-    //Transform();
 }
 
 void Camera::RotateZ(double phi) {
@@ -275,14 +253,8 @@ void Camera::RotateZ(double phi) {
     Center.z += Eye.z;
     
     MultiDot(Up, matrix);
-    
-    
-    
     SetViewMatrix();
-    //Transform();
 }
-
-
 
 double Camera::getFar() {
     return far;

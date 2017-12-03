@@ -1,57 +1,62 @@
 #include "scen_controller.h"
 
-static Dot eye(0, 0, 0), center(1, 1, 1), up(0, 0, 1);
+Point eye(0, 20, 0), center(0, 0, 0), up(0, 0, -1);
 
-ScenController::ScenController() : camera(eye, center, up, 60., 60., 100, 0, 100, 100)
-{}
-
-ScenController::~ScenController()
-{}
-
-void ScenController::pixie(const Cairo::RefPtr<Cairo::Context> &cr, int x, int y)
+SceneController::SceneController(int width, int height) : BaseDrawer(width, height), render(this), cr(nullptr)
 {
-    cr->rectangle(x, y, 1, 1);
-    cr->fill();
+    set_size_request(width, height);
+    camera = new Camera(eye, center, up, 60., 60., 50, 0, this->width, this->height);
+    
+    // render.set_property();
 }
 
-void ScenController::draw_triangle(const Cairo::RefPtr<Cairo::Context> &cr, Vec2i t0, Vec2i t1, Vec2i t2) {
-    if (t0.y == t1.y && t0.y == t2.y)
-        return;
+SceneController::~SceneController()
+{
+    delete camera;
+}
+
+//void SceneController::pixie(int x, int y)
+//{
+//
+//    assert(cr != nullptr);
+////    (*cr)->rectangle(x, y, 1, 1);
+////    (*cr)->fill();
+//}
+
+bool SceneController::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    cr->set_source_rgb(COLOR_WHITE);
+    cr->rectangle(0.0, 0.0, width, height);
+    cr->fill();
+    cr->save();
     
-    if (t0.y > t1.y) std::swap(t0, t1);
-    if (t0.y > t2.y) std::swap(t0, t2);
+    /* init scen */
+    cr->set_line_cap(Cairo::LINE_CAP_ROUND);
+    cr->set_line_width(1.0);
+    /*************/
     
-    if (t1.y > t2.y) std::swap(t1, t2);
+    Gtk::Allocation allocation = get_allocation();
+    this->width = allocation.get_width();
+    this->height = allocation.get_height();
+    this->cr = &cr;
     
-    int total_height = t2.y - t0.y;
-    for (int i = 0; i < total_height; i++) {
-        bool second_half = i > t1.y - t0.y || t1.y == t0.y;
-        int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
-        float alpha = (float) i / total_height;
-        float beta  = (float) (i - (second_half ? t1.y - t0.y : 0)) / segment_height;
-        Vec2i A =               t0 + (t2 - t0) * alpha;
-        Vec2i B = second_half ? t1 + (t2 - t1) * beta : t0 + (t1 - t0) * beta;
-        if (A.x > B.x)
-            std::swap(A, B);
-        
-        for (int j = A.x; j <= B.x; j++) {
-            this->pixie(cr, j, t0.y + i);
+    this->on_update();
+    render.update(this->camera);
+    
+    for (int i = 0; i < height; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+        {
+            if (!matrix[i][j].act)
+                continue;
+            
+            cr->set_source_rgb(COLOR_EXPAND(matrix[i][j].color));
+            cr->move_to(i, j);
+            cr->close_path();
+            cr->stroke(); // TODO (a.naberezhnyi) make faster
         }
     }
-}
-
-bool ScenController::draw_model(const Cairo::RefPtr<Cairo::Context> &cr, Model *m)
-{
-    for (int i = 0; i < m->sizeConnections(); i++)
-    {
-        std::vector<int> c = m->getConnect(i);
-        
-        Vec3i d1, d2, d3;
-        d1 = dtovec3i(m->getNode(c[0]));
-        d2 = dtovec3i(m->getNode(c[1]));
-        d3 = dtovec3i(m->getNode(c[2]));
-        this->draw_triangle(cr, d1.toVec2(), d2.toVec2(), d3.toVec2());
-    }
     
+    refresh_frame();
     return true;
 }

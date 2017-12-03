@@ -3,31 +3,49 @@
 
 #include <limits.h>
 #include <cstdlib>
+#include <iostream>
+#include <vector>
 
+#include "base_drawer.h"
 #include "util.h"
+#include "assert.h"
+#include "camera.h"
+
+#define RENDERER_DEFAULT_NEAR   1
+#define RENDERER_DEFAULT_FAR    100
 
 class Renderer
 {
+public:
+    Renderer(BaseDrawer *drawer);
+    ~Renderer();
+    
+    void set_property(double far, double near);
+    void update(Camera *camera);
+    
+    void add_model(Model *model);
+    void add_line(Line line);
 private:
-    Model *model;
+    void projection(Point &dot);
+    
+    bool draw_model(Camera *camera, Model *m);
+    
+    void draw_triangle(Point &v1, Point &v2, Point &v3, Color &color);
+    void draw_line(Point &v1, Point &v2, Color &color);
+    
+    Point MultiVect(const Point &A, const Point &B);
+    Point barycentric(Point &A, Point &B, Point &C, Point &P);
+    void ResetBuffer();
+    
+    BaseDrawer *drawer;
     
     double *ZBuffer;
     
-    int Width;
-    int Height;
-    
     double far;
     double near;
-public:
-    Renderer(Model *model);
-    Dot barycentric(Dot &A, Dot &B, Dot &C, Dot &P);
-    Dot MultiVect(const Dot &A, const Dot &B);
-    void Triangle(Dot &v1, Dot &v2, Dot &v3, Dot &Tv1, Dot &Tv2, Dot &Tv3, int rgb);
     
-    void DrawAll(double far, double near);
-    void ResetBuffer();
-    
-    ~Renderer();
+    std::vector<Model*> models;
+    std::vector<Line> lines;
 };
 
 #endif //CURSFIN_RENDERER_H

@@ -1,47 +1,47 @@
 #include "easy_scen_controller.h"
 
-EasyScenController::EasyScenController() : ScenController()
+EasySceneController::EasySceneController(int width, int height) : SceneController(width, height), creator(time(0))
 {
     this->add_events( Gdk::KEY_PRESS_MASK );
     this->signal_key_release_event().connect ( sigc::mem_fun(*this,
-        &EasyScenController::on_key_press) );
-//    this->signal_key_press_event().connect(
-//        sigc::mem_fun(*this, &EasyScenController::onKeyPress), false
-//    );
+        &EasySceneController::on_key_press) );
+    
+    
+    creator.Generate();
+    Model *m = creator.GetModel();
+    render.add_model(m);
+    
+    Line lineX(Point(0, 0, 0), Point(10, 0, 0), Color(COLOR_RED));
+    Line lineY(Point(0, 0, 0), Point(0, 10, 0), Color(COLOR_GREEN));
+    Line lineZ(Point(0, 0, 0), Point(0, 0, 10), Color(COLOR_BLUE));
+    render.add_line(lineX);
+    render.add_line(lineY);
+    render.add_line(lineZ);
 }
 
-EasyScenController::~EasyScenController()
+EasySceneController::~EasySceneController()
+{}
+
+void EasySceneController::on_update()
 {
+    std::cout << "Update scen (" << width << ", " << height << ")" << std::endl;
 }
 
 #define ONLY_PRESS(event, button) ((event)->type == GDK_KEY_PRESS && (event)->keyval == (button) && !(event)->state)
-bool EasyScenController::on_key_press(GdkEventKey* event)
+bool EasySceneController::on_key_press(GdkEventKey* event)
 {
-    std::cout << "Key: " << event->keyval << std::endl;
     if (ONLY_PRESS(event, GDK_KEY_w))
-    {
-        std::cout << "test!" << std::endl;
-    }
+        camera->MoveOn(0, 0, 1);
+    else
+    if (ONLY_PRESS(event, GDK_KEY_a))
+        camera->MoveOn(1, 0, 0);
+    else
+    if (ONLY_PRESS(event, GDK_KEY_d))
+        camera->MoveOn(-1, 0, 0);
+    else
+    if (ONLY_PRESS(event, GDK_KEY_s))
+        camera->MoveOn(0, 0, -1);
+    
+    queue_draw();
     return false;
-}
-
-bool EasyScenController::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
-{
-    Gtk::Allocation allocation = get_allocation();
-    const int width = allocation.get_width();
-    const int height = allocation.get_height();
-    
-    std::cout << "Generate size: (" << width << ", " << height << ")" << std::endl;
-    
-    cr->set_line_width(3.0);
-    cr->set_source_rgb(0.8, 0.0, 0.0);
-    
-    Creator creator(time(0));
-    creator.Generate();
-    
-    camera.SetActive(creator.GetModel());
-    
-    this->draw_model(cr, creator.GetModel());
-    
-    return true;
 }

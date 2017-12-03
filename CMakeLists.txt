@@ -23,7 +23,8 @@ set(SOURCE_FILES main.cpp
         include/easy_scen_controller.h
         src/easy_scen_controller.cpp
         include/renderer.h
-        src/renderer.cpp)
+        src/renderer.cpp
+        include/base_drawer.h)
 
 add_executable(cursfin ${SOURCE_FILES})
 target_link_libraries(cursfin
