@@ -1,3 +1,4 @@
+#include <iostream>
 #include "camera.h"
 
 Camera::~Camera()
@@ -19,14 +20,45 @@ Camera::Camera(const Point &eye, const Point &center, const Point &up, double XZ
     ReCalcMatrix();
 }
 
-Point Camera::Transform(Point &dot)
+
+bool Camera::Transform(Point &dot, Point &out)
 {
-    Point result = dot;
+    out = dot;
+    Point &result = out;
+    
     CameraPort(result);
     PProjection(result);
+    
+    if (result.w < 0)
+        std::cout << "w < 0" << std::endl;
+    
+    result.w = fabs(result.w);
+    
+    if (!IN_INTERVAL(result.x, -result.w, result.w))
+    {
+        // x = x0 + mt
+        // ... nt
+        // ... pt
+        // t = - (A * x1 + B * y1 + C * z1 + D) / (A * m + B * n + C * p)
+        
+        // or binary
+        
+        return false;
+    }
+    if (!IN_INTERVAL(result.y, -result.w, result.w))
+        return false;
+    
+    if (!IN_INTERVAL(result.z, -result.w, result.w))
+        return false;
+    
+    result.x /= result.w;
+    result.y /= result.w;
+    result.z /= result.w;
+    result.w = 1;
+    
     ToScreen(result);
     
-    return result;
+    return true;
 }
 
 void Camera::Reverse(double matr[4][4]) {
@@ -67,14 +99,10 @@ void Camera::MultiDot(Point &V, double matrix[4][4]) {
 
 
 void Camera::SetPProjMatrix() {
-    double hfou = XZangle / 180 * M_PI;
-    double right = tan(hfou / 2);
+    double right = tan(XZangle / 2);
     double left = -right;
     
-    double aspect = double(width) / heigth;
-    
-    double ufou = YZangle / 180 * M_PI;
-    double top = tan(ufou / 2);
+    double top = tan(YZangle / 2);
     double bottom = -top;
     
     ViewPort[0][0] = 2. / (right - left);
@@ -135,16 +163,8 @@ void Camera::ReCalcMatrix() {
     SetViewMatrix();
 }
 
-
 void Camera::PProjection(Point &target) {
     MultiDot(target, ViewPort);
-    
-    target.w = abs(target.w);
-    
-    target.x /= target.w;
-    target.y /= target.w;
-    target.z /= target.w;
-    target.w = 1;
 }
 
 void  Camera::SetScreenMatrix() {
@@ -242,7 +262,6 @@ void Camera::RotateZ(double phi) {
         { 0,0,0,1 }
         
     };
-    
     
     Center.x -= Eye.x;
     Center.y -= Eye.y;

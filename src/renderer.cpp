@@ -173,9 +173,9 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera matrix
     
     for (int i = 0; i < vertexes->size() - 2; i += 2)
     {
-        v1_ = camera->Transform((*vertexes)[i]);
-        v2_ = camera->Transform((*vertexes)[i + 1]);
-        v3_ = camera->Transform((*vertexes)[i + 2]);
+        camera->Transform((*vertexes)[i], v1_);
+        camera->Transform((*vertexes)[i + 1], v2_);
+        camera->Transform((*vertexes)[i + 2], v3_);
         
         this->draw_triangle(v1_, v2_, v3_, default_color);
     }
@@ -202,8 +202,12 @@ void Renderer::update(Camera *camera)
     Point v1_, v2_;
     for (auto l = lines.begin(); l < lines.end(); ++l)
     {
-        v1_ = camera->Transform((*l).v1);
-        v2_ = camera->Transform((*l).v2);
+        if (!camera->Transform((*l).v1, v1_))
+            continue;
+        
+        if (!camera->Transform((*l).v2, v2_))
+            continue;
+        
         this->draw_line(v1_, v2_, (*l).color);
     }
 }

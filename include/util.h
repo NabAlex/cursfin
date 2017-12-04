@@ -17,6 +17,8 @@ using namespace std;
 
 /* COLOR */
 
+#define IN_INTERVAL(x, a, b) (((x) <= (b)) && ((x) >= (a)))
+
 struct Color
 {
     Color(double r, double g, double b)
@@ -117,8 +119,6 @@ struct Point
             point.y != this->y ||
             point.z != this->z);
     }
-    
-    
     
     void normalize() {
         double L = sqrt(x * x + y * y + z * z);

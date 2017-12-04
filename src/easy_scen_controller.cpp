@@ -34,10 +34,10 @@ bool EasySceneController::on_key_press(GdkEventKey* event)
         camera->MoveOn(0, 0, 1);
     else
     if (ONLY_PRESS(event, GDK_KEY_a))
-        camera->MoveOn(1, 0, 0);
+        camera->MoveOn(-1, 0, 0);
     else
     if (ONLY_PRESS(event, GDK_KEY_d))
-        camera->MoveOn(-1, 0, 0);
+        camera->MoveOn(1, 0, 0);
     else
     if (ONLY_PRESS(event, GDK_KEY_s))
         camera->MoveOn(0, 0, -1);

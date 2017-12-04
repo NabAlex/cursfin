@@ -7,6 +7,7 @@
 
 #include "util.h"
 #include "camera.h"
+#include "math.h"
 
 #include "base_drawer.h"
 #include "renderer.h"

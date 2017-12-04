@@ -15,8 +15,18 @@ public:
     ~Camera();
     
     // void Transform(Model *model);
-    Point Transform(Point &dot);
+    bool Transform(Point &dot, Point &out);
     
+    void MoveTo(double x, double y, double z);
+    void MoveOn(double dx, double dy, double dz);
+    
+    void RotateX(double phi);
+    void RotateY(double phi);
+    void RotateZ(double phi);
+    
+    double getFar();
+    double getNear();
+private:
     void MultiDot(Point &V, double matrix[4][4]);
     
     void MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[4][4]));
@@ -32,22 +42,12 @@ public:
     void ReCalcMatrix();
     void ToScreen(Point &target);
     
-    void MoveTo(double x, double y, double z);
-    void MoveOn(double dx, double dy, double dz);
-    
-    void RotateX(double phi);
-    void RotateY(double phi);
-    void RotateZ(double phi);
-    
-    double getFar();
-    double getNear();
-private:
-    
     Point Eye;
     Point Center;
     Point Up;
     
-    double Minv[4][4] = { { 1,0,0,0 },{ 0,1,0,0 },{ 0,0,1,0 },{ 0,0,0,1 } };
+    double Minv[4][4] = { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } };
+    
     double ViewPort[4][4] = { { 0,0,0,0 },{ 0,0,0,0 },{ 0,0,0,0 },{ 0,0,0,0 } };
     double Screen[4][4] = { { 0,0,0,0 },{ 0,0,0,0 },{ 0,0,0,0 },{ 0,0,0,0 } };
     
