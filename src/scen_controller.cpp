@@ -1,3 +1,4 @@
+#include <gdkmm.h>
 #include "scen_controller.h"
 
 Point eye(0, 40, 5), center(0, 0, 5), up(0, 0, -1);
@@ -15,48 +16,26 @@ SceneController::~SceneController()
     delete camera;
 }
 
-//void SceneController::pixie(int x, int y)
-//{
-//
-//    assert(cr != nullptr);
-////    (*cr)->rectangle(x, y, 1, 1);
-////    (*cr)->fill();
-//}
-
 bool SceneController::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    cr->set_source_rgb(COLOR_WHITE);
-    cr->rectangle(0.0, 0.0, width, height);
-    cr->fill();
-    cr->save();
     
     /* init scen */
-    cr->set_line_cap(Cairo::LINE_CAP_ROUND);
-    cr->set_line_width(1.0);
-    /*************/
     
-    Gtk::Allocation allocation = get_allocation();
-    this->width = allocation.get_width();
-    this->height = allocation.get_height();
-    this->cr = &cr;
+    /*************/
     
     this->on_update();
     render.update(this->camera);
+
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create_from_data((const guint8 *) this->frame_buffer,
+        Gdk::Colorspace::COLORSPACE_RGB,
+        true, 8,
+        this->width, this->height, this->width * 4);
     
-    for (int i = 0; i < height; ++i)
-    {
-        for (int j = 0; j < width; ++j)
-        {
-            if (!matrix[i][j].act)
-                continue;
-            
-            cr->set_source_rgb(COLOR_EXPAND(matrix[i][j].color));
-            cr->move_to(i, j);
-            cr->close_path();
-            cr->stroke(); // TODO (a.naberezhnyi) make faster
-        }
-    }
+    cr->save();
+
+    Gdk::Cairo::set_source_pixbuf(cr, pixbuf, 0, 0);
     
+    cr->paint();
     refresh_frame();
     return true;
 }

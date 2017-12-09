@@ -60,9 +60,9 @@ Point Renderer::MultiVect(const Point &A, const Point &B) {
 }
 
 Point Renderer::barycentric(Point &A, Point &B, Point &C, Point &P) {
-    double delta = (B.x - A.x)*(C.y - A.y) - (C.x - A.x)*(B.y - A.y);
-    double delta1 = (B.x*C.y - C.x*B.y) + P.x*(B.y - C.y) + P.y*(C.x - B.x);
-    double delta2 = (C.x*A.y - A.x*C.y) + P.x*(C.y - A.y) + P.y*(A.x - C.x);
+    double delta = (B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y);
+    double delta1 = (B.x * C.y - C.x * B.y) + P.x * (B.y - C.y) + P.y * (C.x - B.x);
+    double delta2 = (C.x * A.y - A.x * C.y) + P.x * (C.y - A.y) + P.y * (A.x - C.x);
     
     double a = delta1 / delta;
     double b = delta2 / delta;
@@ -70,7 +70,7 @@ Point Renderer::barycentric(Point &A, Point &B, Point &C, Point &P) {
     return Point(a, b, 1. - a - b);
 }
 
-void Renderer::draw_line(Point &v1, Point &v2, Color &color)
+void Renderer::draw_line(Point &v1, Point &v2, color_t color)
 {
     CHECK_ZBUFFER();
     
@@ -117,7 +117,7 @@ void Renderer::draw_line(Point &v1, Point &v2, Color &color)
     }
 }
 
-void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, Color &color)
+void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, color_t color)
 {
     CHECK_ZBUFFER();
     
@@ -151,33 +151,30 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, Color &color)
             if (Bary.x < 0 || Bary.y < 0 || Bary.z < 0)
                 continue;
             
-            
             z = Bary.x * v1.z + Bary.y * v2.z + Bary.z * v3.z;
             if (z >= near && z < ZBuffer[x + y * drawer->width]) {
                 ZBuffer[x + y * drawer->width] = z;
-                
+                // TODO
                 drawer->pixie(x, y, color);
             }
         }
     }
 }
 
-bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera matrix
+bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buffer
 {
     CHECK_ZBUFFER();
-    
-    static Color default_color(COLOR_BLACK);
     
     auto vertexes = m->getVertex();
     Point v1_, v2_, v3_;
     
     for (int i = 0; i < vertexes->size() - 2; i += 2)
     {
-        camera->Transform((*vertexes)[i], v1_);
-        camera->Transform((*vertexes)[i + 1], v2_);
-        camera->Transform((*vertexes)[i + 2], v3_);
+        camera->Transform((*vertexes)[i], v1_, false);
+        camera->Transform((*vertexes)[i + 1], v2_, false);
+        camera->Transform((*vertexes)[i + 2], v3_, false);
         
-        this->draw_triangle(v1_, v2_, v3_, default_color);
+        this->draw_triangle(v1_, v2_, v3_, COLOR_GREEN);
     }
     
     return true;
@@ -202,10 +199,10 @@ void Renderer::update(Camera *camera)
     Point v1_, v2_;
     for (auto l = lines.begin(); l < lines.end(); ++l)
     {
-        if (!camera->Transform((*l).v1, v1_))
+        if (!camera->Transform((*l).v1, v1_, true))
             continue;
         
-        if (!camera->Transform((*l).v2, v2_))
+        if (!camera->Transform((*l).v2, v2_, true))
             continue;
         
         this->draw_line(v1_, v2_, (*l).color);

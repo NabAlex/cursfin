@@ -15,7 +15,7 @@ public:
     ~Camera();
     
     // void Transform(Model *model);
-    bool Transform(Point &dot, Point &out);
+    bool Transform(Point &dot, Point &out, bool check);
     
     void MoveTo(double x, double y, double z);
     void MoveOn(double dx, double dy, double dz);

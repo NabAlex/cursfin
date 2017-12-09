@@ -4,15 +4,9 @@
 #include <limits.h>
 #include <assert.h>
 
+#include <gdkmm.h>
+
 #include "util.h"
-
-#define FRAME_NONE UINT32_MAX
-
-struct Pixie
-{
-    bool act;
-    Color color;
-};
 
 class BaseDrawer
 {
@@ -22,40 +16,57 @@ public:
         this->width = w;
         this->height = h;
         
-        matrix = new Pixie*[height + 1];
-        for (int i = 0; i < height + 1; ++i)
-            matrix[i] = new Pixie[width + 1];
+        this->_size = this->width * this->height * sizeof(color_t);
+        this->frame_buffer = new color_t[this->width * this->height];
         
-        refresh_frame();
+//        frame_buffer = new Pixie*[height + 1];
+//        for (int i = 0; i < height + 1; ++i)
+//            frame_buffer[i] = new Pixie[width + 1];
+//
+//        refresh_frame();
     }
     
     ~BaseDrawer()
     {
-        for (int i = 0; i < height; ++i)
-            delete matrix[i];
-        delete[] matrix;
+        delete[] this->frame_buffer;
+        
+//        for (int i = 0; i < height; ++i)
+//            delete frame_buffer[i];
+//        delete[] frame_buffer;
     }
     
     void refresh_frame()
     {
-        for (int i = 0; i < height + 1; ++i)
-            for (int j = 0; j < width + 1; ++j)
-                matrix[i][j].act = false;
+        memset(this->frame_buffer, 255, this->_size);
+//        for (int i = 0; i < height + 1; ++i)
+//            for (int j = 0; j < width + 1; ++j)
+//                frame_buffer[i][j].act = false;
     }
     
-    void pixie(int x, int y, Color &color)
+    void pixie(int x, int y, color_t rgb)
     {
         if (x < 0 || x > width || y < 0 || y > height)
             return;
         
-        matrix[x][y].color = color;
-        matrix[x][y].act = true;
+        int el = y * width + x;
+        
+        frame_buffer[el] = rgb;
+        
+//        if (x < 0 || x > width || y < 0 || y > height)
+//            return;
+//
+//        frame_buffer[x][y].color = color;
+//        frame_buffer[x][y].act = true;
     }
+    
+    size_t _size;
     
     int width;
     int height;
     
-    Pixie **matrix;
+    color_t *frame_buffer;
+    
+    // Pixie **frame_buffer;
 };
 
 #endif //CURSFIN_BASE_DRAWER_H

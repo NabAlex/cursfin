@@ -3,66 +3,30 @@
 
 #include <vector>
 #include <math.h>
+#include <stdint-gcc.h>
 
 using namespace std;
 
 /* work with COLOR */
-#define COLOR_EXPAND(obj)   (obj).r, (obj).g, (obj).b
+typedef uint32_t color_t;
 
-#define COLOR_BLACK         0.0, 0.0, 0.0
-#define COLOR_RED           1.0, 0.0, 0.0
-#define COLOR_GREEN         0.0, 1.0, 0.0
-#define COLOR_BLUE          0.0, 0.0, 1.0
-#define COLOR_WHITE         1.0, 1.0, 1.0
+inline color_t color_pack(int32_t r, int32_t g, int32_t b)
+{
+    return (255 << 24) | (r << 16) | (g << 8) | (b);
+}
 
-/* COLOR */
+#define COLOR_BLACK color_pack(0, 0, 0)
+#define COLOR_WHITE color_pack(255, 255, 255)
+
+#define COLOR_RED color_pack(255, 0, 0)
+#define COLOR_GREEN color_pack(0, 255, 0)
+#define COLOR_BLUE color_pack(0, 0, 255)
 
 #define IN_INTERVAL(x, a, b) (((x) <= (b)) && ((x) >= (a)))
-
-struct Color
-{
-    Color(double r, double g, double b)
-    {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-    }
-    
-    Color(const Color &c)
-    {
-        this->r = c.r;
-        this->g = c.g;
-        this->b = c.b;
-    }
-    
-    Color()
-    {
-        this->r = 0.0;
-        this->g = 0.0;
-        this->b = 0.0;
-    }
-    
-    Color *clone()
-    {
-        return new Color(*this);
-    }
-    
-    double r;
-    double g;
-    double b;
-};
 
 struct Point
 {
     Point(double x, double y, double z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        this->w = 1;
-    }
-    
-    Point(double x, double y, double z, Color *color)
     {
         this->x = x;
         this->y = y;
@@ -132,13 +96,13 @@ class Line
 {
 public:
     Line(Point v1, Point v2);
-    Line(Point v1, Point v2, Color color);
+    Line(Point v1, Point v2, color_t color);
     ~Line();
     
     Line(const Line &l);
 
     Point v1, v2;
-    Color color;
+    color_t color;
 };
 
 class Model
@@ -151,6 +115,13 @@ private:
     vector <vector<int>> tex_connections;
 public:
     Model() = default;
+    Model(Point v1, Point v2, Point v3)
+    {
+        this->addVertex(v1);
+        this->addVertex(v2);
+        this->addVertex(v3);
+    }
+    
     ~Model() {}
     
     bool addVertex(Point dot)

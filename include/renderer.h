@@ -30,8 +30,8 @@ private:
     
     bool draw_model(Camera *camera, Model *m);
     
-    void draw_triangle(Point &v1, Point &v2, Point &v3, Color &color);
-    void draw_line(Point &v1, Point &v2, Color &color);
+    void draw_triangle(Point &v1, Point &v2, Point &v3, color_t color);
+    void draw_line(Point &v1, Point &v2, color_t color);
     
     Point MultiVect(const Point &A, const Point &B);
     Point barycentric(Point &A, Point &B, Point &C, Point &P);

@@ -8,16 +8,24 @@
 class Creator
 {
 public:
-    Creator(unsigned int seed);
+    Creator(size_t max_polygons, unsigned int seed);
     ~Creator();
     
+    void setProperty(int width, int height);
+    
     void Generate();
-    Model *GetModel();
+    Model **GetModels();
+    size_t SizeModels();
     
     bool isGenerated();
 private:
     bool generated;
     Model *m;
+    
+    Model **models;
+    size_t models_size;
+    
+    int w, h;
 };
 
 #endif //CURSFIN_CREATOR_H

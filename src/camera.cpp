@@ -21,7 +21,7 @@ Camera::Camera(const Point &eye, const Point &center, const Point &up, double XZ
 }
 
 
-bool Camera::Transform(Point &dot, Point &out)
+bool Camera::Transform(Point &dot, Point &out, bool check)
 {
     out = dot;
     Point &result = out;
@@ -29,12 +29,9 @@ bool Camera::Transform(Point &dot, Point &out)
     CameraPort(result);
     PProjection(result);
     
-    if (result.w < 0)
-        std::cout << "w < 0" << std::endl;
-    
     result.w = fabs(result.w);
     
-    if (!IN_INTERVAL(result.x, -result.w, result.w))
+    if (check && !IN_INTERVAL(result.x, -result.w, result.w))
     {
         // x = x0 + mt
         // ... nt
@@ -45,10 +42,10 @@ bool Camera::Transform(Point &dot, Point &out)
         
         return false;
     }
-    if (!IN_INTERVAL(result.y, -result.w, result.w))
+    if (check && !IN_INTERVAL(result.y, -result.w, result.w))
         return false;
     
-    if (!IN_INTERVAL(result.z, -result.w, result.w))
+    if (check && !IN_INTERVAL(result.z, -result.w, result.w))
         return false;
     
     result.x /= result.w;
@@ -96,7 +93,6 @@ void Camera::MultiDot(Point &V, double matrix[4][4]) {
     new_dot.w = matrix[0][3] * V.x + matrix[1][3] * V.y + matrix[2][3] * V.z + matrix[3][3] * V.w;
     V = new_dot;
 }
-
 
 void Camera::SetPProjMatrix() {
     double right = tan(XZangle / 2);
@@ -206,16 +202,15 @@ void Camera::MoveOn(double dx, double dy, double dz) {
     Eye = Eye + Vect;
     Center = Center + Vect;
     
-    ReCalcMatrix();
+    SetViewMatrix();
 }
 
 void Camera::RotateX(double phi) {
-    phi = phi / 180 * M_PI;
     double matrix[4][4] = {
-        { 1,0,0,0 },
-        { 0,cos(phi),sin(phi),0 },
-        { 0,-sin(phi),cos(phi),0 },
-        { 0,0,0,1 }
+        { 1, 0, 0, 0 },
+        { 0, cos(phi), sin(phi), 0 },
+        { 0, -sin(phi), cos(phi), 0 },
+        { 0, 0, 0, 1 }
     };
     
     Center.x -= Eye.x;
@@ -232,12 +227,11 @@ void Camera::RotateX(double phi) {
 }
 
 void Camera::RotateY(double phi) {
-    phi = phi / 180 * M_PI;
     double matrix[4][4] = {
-        { cos(phi),0,-sin(phi),0 },
-        { 0,1,0,0 },
-        { sin(phi),0,cos(phi),0 },
-        { 0,0,0,1 }
+        { cos(phi), 0, -sin(phi), 0 },
+        { 0, 1, 0, 0 },
+        { sin(phi), 0, cos(phi), 0 },
+        { 0, 0, 0, 1 }
     };
     
     Center.x -= Eye.x;
@@ -254,12 +248,11 @@ void Camera::RotateY(double phi) {
 }
 
 void Camera::RotateZ(double phi) {
-    phi = phi / 180 * M_PI;
     double matrix[4][4] = {
-        { cos(phi),sin(phi),0,0 },
-        { -sin(phi),cos(phi),0,0 },
-        { 0,0,1,0 },
-        { 0,0,0,1 }
+        { cos(phi), sin(phi), 0, 0 },
+        { -sin(phi), cos(phi), 0, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 1 }
         
     };
     
