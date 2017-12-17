@@ -6,8 +6,9 @@ Point eye(0, 40, 5), center(0, 0, 5), up(0, 0, -1);
 SceneController::SceneController(int width, int height) : BaseDrawer(width, height), render(this), cr(nullptr)
 {
     set_size_request(width, height);
-    camera = new Camera(eye, center, up, M_PI / 3, M_PI / 3, 50, 0, this->width, this->height);
+    camera = new Camera(eye, center, up, M_PI / 3, M_PI / 3, 50, 1, this->width, this->height);
     
+    render.set_property(50, 1);
     // render.set_property();
 }
 

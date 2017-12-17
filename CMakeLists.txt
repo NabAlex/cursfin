@@ -24,7 +24,18 @@ set(SOURCE_FILES main.cpp
         src/easy_scen_controller.cpp
         include/renderer.h
         src/renderer.cpp
-        include/base_drawer.h)
+        include/base_drawer.h
+
+        include/perlin_noise.h
+
+        include/texture.h
+        src/texture.cpp
+
+        include/model.h
+        src/model.cpp
+
+        include/light.h
+        src/light.cpp)
 
 add_executable(cursfin ${SOURCE_FILES})
 target_link_libraries(cursfin

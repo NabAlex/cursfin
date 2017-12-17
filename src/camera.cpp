@@ -33,10 +33,11 @@ bool Camera::Transform(Point &dot, Point &out, bool check)
     
     if (check && !IN_INTERVAL(result.x, -result.w, result.w))
     {
+        // TODO
         // x = x0 + mt
         // ... nt
         // ... pt
-        // t = - (A * x1 + B * y1 + C * z1 + D) / (A * m + B * n + C * p)
+        // T = - (A * x1 + B * y1 + C * z1 + D) / (A * m + B * n + C * p)
         
         // or binary
         
@@ -50,7 +51,7 @@ bool Camera::Transform(Point &dot, Point &out, bool check)
     
     result.x /= result.w;
     result.y /= result.w;
-    result.z /= result.w;
+    // result.z /= result.w;
     result.w = 1;
     
     ToScreen(result);
@@ -100,6 +101,17 @@ void Camera::SetPProjMatrix() {
     
     double top = tan(YZangle / 2);
     double bottom = -top;
+    
+//    ViewPort[0][0] = 2. * near / (right - left);
+//    ViewPort[0][2] = (right + left) / (right - left);
+//
+//    ViewPort[1][1] = 2. * near / (top - bottom);
+//    ViewPort[1][2] = (top + bottom) / (top - bottom);
+//
+//    ViewPort[2][2] = -(far + near) / (far - near);
+//    ViewPort[2][3] = -2 * far * near / (far - near);
+//
+//    ViewPort[3][2] = -1;
     
     ViewPort[0][0] = 2. / (right - left);
     ViewPort[1][1] = 2. / (top - bottom);

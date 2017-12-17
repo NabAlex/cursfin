@@ -7,9 +7,12 @@
 #include <vector>
 
 #include "base_drawer.h"
+#include "model.h"
+
 #include "util.h"
 #include "assert.h"
 #include "camera.h"
+#include "light.h"
 
 #define RENDERER_DEFAULT_NEAR   1
 #define RENDERER_DEFAULT_FAR    100
@@ -25,13 +28,16 @@ public:
     
     void add_model(Model *model);
     void add_line(Line line);
+    void add_light(Light *light);
 private:
     void projection(Point &dot);
     
     bool draw_model(Camera *camera, Model *m);
     
-    void draw_triangle(Point &v1, Point &v2, Point &v3, color_t color);
+    void draw_triangle(Point &v1, Point &v2, Point &v3, Texture *texture);
     void draw_line(Point &v1, Point &v2, color_t color);
+    
+    bool is_light();
     
     Point MultiVect(const Point &A, const Point &B);
     Point barycentric(Point &A, Point &B, Point &C, Point &P);
@@ -46,6 +52,8 @@ private:
     
     std::vector<Model*> models;
     std::vector<Line> lines;
+    
+    std::vector<Light*> lights;
 };
 
 #endif //CURSFIN_RENDERER_H

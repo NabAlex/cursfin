@@ -11,7 +11,7 @@ static Point generate_vertex()
 Creator::Creator(size_t max_polygons, unsigned int seed)
 {
     models = new Model*[max_polygons * 20];
-    models_size = max_polygons * 20;
+    this->max_polygons = 0;
     
     srand(seed);
     
@@ -34,7 +34,30 @@ static Model *next_node(Point new_point)
 
 void Creator::Generate()
 {
+    // PerlinNoise
+    
+    Texture *texture = new StoneTexture(1024, 32);
+    
     size_t index_polygon = 0;
+//    models[index_polygon++] = new Model(
+//        Point(0, 0, 0, 0, 0),
+//        Point(0, 0, 10, 1, 0),
+//        Point(10, 0, 0, 0, 1),
+//        texture
+//    );
+//
+//    models[index_polygon++] = new Model(
+//        Point(10, 0, 0, 0, 1),
+//        Point(0, 0, 10, 1, 0),
+//        Point(10, 0, 10, 0, 1),
+//        texture
+//    );
+    
+    
+    models_size = index_polygon;
+    
+    /*
+    
     for (int j = 0; j < 20; ++j)
     {
         point1 = Point(0, j, 0);
@@ -70,8 +93,9 @@ void Creator::Generate()
                 xvisor = 1;
             }
         }
+        
     }
-    
+    */
 //    Model *raw = new Model();
 //    raw->addVertex(generate_vertex());
 //    raw->addVertex(generate_vertex());

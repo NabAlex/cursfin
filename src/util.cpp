@@ -27,3 +27,17 @@ Line::Line(const Line &l)
     
     this->color = l.color;
 }
+
+void multi_vect(const Vec3d &A, const Vec3d &B, Vec3d &out) {
+    out.x = A.y * B.z - A.z * B.y;
+    out.y = A.z * B.x - A.x * B.z;
+    out.z = A.x * B.y - A.y * B.x;
+}
+
+void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out)
+{
+    Vec3d v1(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
+    Vec3d v2(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z);
+    multi_vect(v1, v2, out);
+    out.normalize();
+}

@@ -38,6 +38,11 @@ void Renderer::add_line(Line line)
     this->lines.push_back(line);
 }
 
+void Renderer::add_light(Light *light)
+{
+    this->lights.push_back(light);
+}
+
 Renderer::Renderer(BaseDrawer *drawer) : ZBuffer(nullptr)
 {
     assert(drawer != nullptr);
@@ -117,7 +122,7 @@ void Renderer::draw_line(Point &v1, Point &v2, color_t color)
     }
 }
 
-void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, color_t color)
+void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, Texture *texture = nullptr)
 {
     CHECK_ZBUFFER();
     
@@ -128,18 +133,14 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, color_t color)
     int MaxZ = max(v1.z, v2.z, v3.z);
     int MinZ = min(v1.z, v2.z, v3.z);
     
-    //Cutter
-    {
-        if (MaxZ < near || MinZ > far) return;
-        if (MaxX < 0 || MaxY < 0 || MinX > drawer->width || MinY > drawer->height) return;
-        if (MaxX >= drawer->width) MaxX = drawer->width - 1;
-        if (MinX < 0) MinX = 0;
-        if (MaxY >= drawer->height) MaxY = drawer->height - 1;
-        if (MinY < 0) MinY = 0;
-    }
-    //Cutter
-    
-    Point P(MinX, MinY,1);
+    if (MaxZ < near || MinZ > far) return;
+    if (MaxX < 0 || MaxY < 0 || MinX > drawer->width || MinY > drawer->height) return;
+    if (MaxX >= drawer->width) MaxX = drawer->width - 1;
+    if (MinX < 0) MinX = 0;
+    if (MaxY >= drawer->height) MaxY = drawer->height - 1;
+    if (MinY < 0) MinY = 0;
+
+    Point P(MinX, MinY, 1);
     
     double z = 0;
     Point Bary;
@@ -152,10 +153,36 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, color_t color)
                 continue;
             
             z = Bary.x * v1.z + Bary.y * v2.z + Bary.z * v3.z;
-            if (z >= near && z < ZBuffer[x + y * drawer->width]) {
+            if (z >= near && z <= far && z < ZBuffer[x + y * drawer->width]) {
                 ZBuffer[x + y * drawer->width] = z;
-                // TODO
-                drawer->pixie(x, y, color);
+                
+                // Light *here =
+                // color = MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance);
+                
+                if (texture != nullptr)
+                {
+                    double x_color = Bary.x * v1.u + Bary.y * v2.u + Bary.z * v3.u;
+                    double y_color = Bary.x * v1.v + Bary.y * v2.v + Bary.z * v3.v;
+    
+                    if (is_light())
+                    {
+                        Light *light = lights[0];
+                        
+                        color_t real_color = texture->get_safe(x_color, y_color);
+                        // TODO
+                    }
+                    else
+                        drawer->pixie(x, y, texture->get_safe(x_color, y_color));
+                    continue;
+                }
+                
+#define GET_BARY_COLOR(f, c1, c2, c3, b1, b2, b3) f((c1)) * (b1) + f((c2)) * (b2) + f(c3) * (b3)
+                int32_t final_r = GET_BARY_COLOR(COLOR_UNPACK_R, v1.color, v2.color, v3.color, Bary.x, Bary.y, Bary.z);
+                int32_t final_g = GET_BARY_COLOR(COLOR_UNPACK_G, v1.color, v2.color, v3.color, Bary.x, Bary.y, Bary.z);
+                int32_t final_b = GET_BARY_COLOR(COLOR_UNPACK_B, v1.color, v2.color, v3.color, Bary.x, Bary.y, Bary.z);
+                drawer->pixie(x, y, color_pack(final_r, final_g, final_b));
+#undef GET_BARY_COLOR
+                
             }
         }
     }
@@ -174,7 +201,7 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buf
         camera->Transform((*vertexes)[i + 1], v2_, false);
         camera->Transform((*vertexes)[i + 2], v3_, false);
         
-        this->draw_triangle(v1_, v2_, v3_, COLOR_GREEN);
+        this->draw_triangle(v1_, v2_, v3_, m->getTexture()/*COLOR_GREEN*/);
     }
     
     return true;
@@ -214,44 +241,7 @@ void Renderer::projection(Point &dot)
     
 }
 
-//void  Renderer::DrawAll(double Far, double Near)
-//{
-//    CHECK_ZBUFFER();
-//
-//    far = Far;
-//    near = Near;
-//
-//
-//    int rgb = color.rgb();
-//
-//    Image->fill(QColor(196,246,255));
-//    ResetBuffer();
-//
-//    for (int i = 0, N = Connections->size(); i < N; i++) {
-//        rgb = cl[i];// QColor(rand() % 255, rand() % 255, rand() % 255).rgb();
-//        //rgb = QColor(Qt::gray).rgb();
-//        draw_triangle((*Vertex)[(*Connections)[i][0]], (*Vertex)[(*Connections)[i][1]], (*Vertex)[(*Connections)[i][2]],
-//            (*TexVertex)[(*TexConnections)[i][0]], (*TexVertex)[(*TexConnections)[i][1]], (*TexVertex)[(*TexConnections)[i][2]]
-//            ,rgb);
-//    }
-//
-//    vector <Point>* Vp = Grass->getVertex();
-//    vector <vector<int>>* Cp = Grass->getConnections();
-//    vector <Point>* TVp = Grass->getTexVertex();
-//    vector <vector<int>>* TCp = Grass->getTexConnections();
-//
-//    for (int i = 0, N = Cp->size(); i < N; i++) {
-//        TriangleTex((*Vp)[(*Cp)[i][0]], (*Vp)[(*Cp)[i][1]], (*Vp)[(*Cp)[i][2]],
-//            (*TVp)[(*TCp)[i][0]], (*TVp)[(*TCp)[i][1]], (*TVp)[(*TCp)[i][2]]
-//            , rgb);
-//    }
-//
-//
-//    for (int i = 0, N = Pyramids->size(); i < N; i++) {
-//        vector <Point>* V = (*Pyramids)[i].getVertex();
-//        vector <vector<int>>* C = (*Pyramids)[i].getConnections();
-//        for (int j = 0, M = C->size(); j < M; j++) {
-//            TriangleG((*V)[(*C)[j][0]], (*V)[(*C)[j][1]], (*V)[(*C)[j][2]], rgb);
-//        }
-//    }
-//}
+bool Renderer::is_light()
+{
+    return !lights.empty();
+}

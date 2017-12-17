@@ -3,7 +3,11 @@
 
 #include <random>
 
+#include "texture.h"
+
 #include "util.h"
+#include "model.h"
+#include "perlin_noise.h"
 
 class Creator
 {
@@ -24,6 +28,8 @@ private:
     
     Model **models;
     size_t models_size;
+    
+    size_t max_polygons;
     
     int w, h;
 };
