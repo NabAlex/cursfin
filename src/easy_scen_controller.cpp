@@ -1,18 +1,19 @@
 #include "easy_scen_controller.h"
 
-size_t polygons = 20;
+Light *light;
 
-EasySceneController::EasySceneController(int width, int height) : SceneController(width, height), creator(polygons, time(0))
+EasySceneController::EasySceneController(int width, int height) : SceneController(width, height), creator(time(0))
 {
     this->add_events( Gdk::KEY_PRESS_MASK );
     this->signal_key_release_event().connect ( sigc::mem_fun(*this,
         &EasySceneController::on_key_press) );
     
     
-    creator.Generate();
-    Model **m = creator.GetModels();
-    for (int i = 0; i < creator.SizeModels(); ++i)
-        render.add_model(m[i]);
+    creator.generate(0, 1);
+    creator.generate(10, -1);
+    
+    for (int i = 0; i < creator.models.size(); ++i)
+        render.add_model(creator.models[i]);
     
     Line lineX(Point(0, 0, 0), Point(10, 0, 0), COLOR_RED);
     Line lineY(Point(0, 0, 0), Point(0, 10, 0), COLOR_GREEN);
@@ -21,50 +22,15 @@ EasySceneController::EasySceneController(int width, int height) : SceneControlle
     render.add_line(lineY);
     render.add_line(lineZ);
     
-    Light *light = new Light(10, 10, 10);
+    light = new Light(LIGHT_INTENSITY_NORMAL, 1, 1, 10);
     render.add_light(light);
-    
-//    Vec3d out;
-//    Point p1(0, 0, 0), p2(10, 0, 0), p3(0, 0, 10);
-//    get_normal(p1, p2, p3, out);
-//    render.add_line(Line(p1, VTOP(out), COLOR_GREEN));
-    
-    double v = 0., u = 0., du = 0.001, dv = 0.001;
-    double z = -4;
-
-    Texture *texture = new StoneTexture(1024, 256);
-
-    Point first(-10, 0, 0, u += du, v += dv);
-    for (int32_t x = -9; x <= 9; x += 1)
-    {
-        double y = -sqrt(100 - x * x);
-        Point last(x, 0, y, u += du, v += dv);
-        Point byZ(x, z, y);
-        
-        Vec3d n;
-        get_normal(first, last, byZ, n);
-        first.norm = n.clone();
-        last.norm = n.clone();
-        byZ.norm = n.clone();
-    
-        Model *new_model = new Model(first, last, byZ, texture);
-        render.add_model(new_model);
-
-//        new_model = new Model(first, Point(last.x, z, last.z, u += du, v += dv), Point(first.x, z, first.z, u += du, v += dv), texture);
-//        render.add_model(new_model);
-
-        first = last;
-    }
-    
 }
 
 EasySceneController::~EasySceneController()
 {}
 
 void EasySceneController::on_update()
-{
-    // std::cout << "Update scen (" << width << ", " << height << ")" << std::endl;
-}
+{}
 
 #define ONLY_PRESS(event, button) ((event)->type == GDK_KEY_PRESS && (event)->keyval == (button) && !(event)->state)
 bool EasySceneController::on_key_press(GdkEventKey* event)
@@ -86,6 +52,30 @@ bool EasySceneController::on_key_press(GdkEventKey* event)
     else
     if (ONLY_PRESS(event, GDK_KEY_k))
         camera->RotateZ(-M_PI / 30);
+    
+    if (ONLY_PRESS(event, GDK_KEY_o))
+    {
+        light->get_model()->v1.x += 1;
+        light->x += 1;
+    }
+    else
+    if (ONLY_PRESS(event, GDK_KEY_p))
+    {
+        light->get_model()->v1.x -= 1;
+        light->x -= 1;
+    }
+    else
+    if (ONLY_PRESS(event, GDK_KEY_i))
+    {
+        light->get_model()->v1.z += 1;
+        light->z += 1;
+    }
+    else
+    if (ONLY_PRESS(event, GDK_KEY_u))
+    {
+        light->get_model()->v1.z -= 1;
+        light->z -= 1;
+    }
     
     queue_draw();
     return false;

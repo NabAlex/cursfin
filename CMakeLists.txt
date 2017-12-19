@@ -35,7 +35,10 @@ set(SOURCE_FILES main.cpp
         src/model.cpp
 
         include/light.h
-        src/light.cpp)
+        src/light.cpp
+
+        include/scalar_field.h
+        src/scalar_field.cpp)
 
 add_executable(cursfin ${SOURCE_FILES})
 target_link_libraries(cursfin

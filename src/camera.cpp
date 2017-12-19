@@ -21,8 +21,10 @@ Camera::Camera(const Point &eye, const Point &center, const Point &up, double XZ
 }
 
 
-bool Camera::Transform(Point &dot, Point &out, bool check)
+bool Camera::Transform(Point &dot, Point &out, bool continue_anyway)
 {
+    bool res = true;
+    
     out = dot;
     Point &result = out;
     
@@ -31,7 +33,7 @@ bool Camera::Transform(Point &dot, Point &out, bool check)
     
     result.w = fabs(result.w);
     
-    if (check && !IN_INTERVAL(result.x, -result.w, result.w))
+    if (!IN_INTERVAL(result.x, -result.w, result.w))
     {
         // TODO
         // x = x0 + mt
@@ -41,13 +43,16 @@ bool Camera::Transform(Point &dot, Point &out, bool check)
         
         // or binary
         
-        return false;
+        res = false;
     }
-    if (check && !IN_INTERVAL(result.y, -result.w, result.w))
-        return false;
+    if (!IN_INTERVAL(result.y, -result.w, result.w))
+        res = false;
     
-    if (check && !IN_INTERVAL(result.z, -result.w, result.w))
-        return false;
+    if (!IN_INTERVAL(result.z, -result.w, result.w))
+        res = false;
+    
+    if (!res && !continue_anyway)
+        return res;
     
     result.x /= result.w;
     result.y /= result.w;
@@ -56,7 +61,7 @@ bool Camera::Transform(Point &dot, Point &out, bool check)
     
     ToScreen(result);
     
-    return true;
+    return res;
 }
 
 void Camera::Reverse(double matr[4][4]) {

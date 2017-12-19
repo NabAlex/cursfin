@@ -34,7 +34,10 @@ private:
     
     bool draw_model(Camera *camera, Model *m);
     
-    void draw_triangle(Point &v1, Point &v2, Point &v3, Texture *texture);
+    void draw_triangle(Point &v1, Point &v2, Point &v3,
+        double i1, double i2, double i3,
+        Texture *texture);
+    
     void draw_line(Point &v1, Point &v2, color_t color);
     
     bool is_light();

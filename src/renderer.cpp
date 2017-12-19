@@ -58,9 +58,9 @@ Renderer::~Renderer()
 
 Point Renderer::MultiVect(const Point &A, const Point &B) {
     Point Temp;
-    Temp.x = A.y*B.z - A.z*B.y;
-    Temp.y = A.z*B.x - A.x*B.z;
-    Temp.z = A.x*B.y - A.y*B.x;
+    Temp.x = A.y * B.z - A.z * B.y;
+    Temp.y = A.z * B.x - A.x * B.z;
+    Temp.z = A.x * B.y - A.y * B.x;
     return Temp;
 }
 
@@ -122,7 +122,26 @@ void Renderer::draw_line(Point &v1, Point &v2, color_t color)
     }
 }
 
-void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, Texture *texture = nullptr)
+static inline double get_cos_angle(Vec3d *vec1, Point &p, double x, double y, double z)
+{
+    Vec3d vec2(x - p.x, y - p.y, z - p.z);
+    vec2.normalize();
+    
+    return vec1->x * vec2.x + vec1->y * vec2.y + vec1->z * vec2.z;
+}
+
+static inline double dist(Point &p, double x, double y, double z)
+{
+    double xx = (p.x - x);
+    double yy = (p.y - y);
+    double zz = (p.z - z);
+    
+    return sqrt(xx * xx + yy * yy + zz * zz);
+}
+
+void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3,
+        double i1, double i2, double i3,
+        Texture *texture = nullptr)
 {
     CHECK_ZBUFFER();
     
@@ -156,23 +175,20 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3, Texture *texture =
             if (z >= near && z <= far && z < ZBuffer[x + y * drawer->width]) {
                 ZBuffer[x + y * drawer->width] = z;
                 
-                // Light *here =
-                // color = MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance);
-                
                 if (texture != nullptr)
                 {
                     double x_color = Bary.x * v1.u + Bary.y * v2.u + Bary.z * v3.u;
                     double y_color = Bary.x * v1.v + Bary.y * v2.v + Bary.z * v3.v;
-    
-                    if (is_light())
-                    {
-                        Light *light = lights[0];
-                        
-                        color_t real_color = texture->get_safe(x_color, y_color);
-                        // TODO
-                    }
-                    else
-                        drawer->pixie(x, y, texture->get_safe(x_color, y_color));
+                    
+                    color_t real_color = texture->get_safe(x_color, y_color);
+                    
+                    double xi = Bary.x * i1 + (1 - Bary.x) * i2;
+                    double yi = Bary.y * i1 + (1 - Bary.y) * i3;
+                    
+                    double final = Bary.z * yi + (1 - Bary.z) * xi;
+                    
+                    drawer->pixie(x, y, COLOR_MULTI_SAFE(min, real_color, final));
+                    
                     continue;
                 }
                 
@@ -192,18 +208,29 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buf
 {
     CHECK_ZBUFFER();
     
-    auto vertexes = m->getVertex();
-    Point v1_, v2_, v3_;
-    
-    for (int i = 0; i < vertexes->size() - 2; i += 2)
+    double i1 = 1, i2 = 1, i3 = 1;
+    if (is_light() && m->v1.norm && m->v2.norm && m->v3.norm)
     {
-        camera->Transform((*vertexes)[i], v1_, false);
-        camera->Transform((*vertexes)[i + 1], v2_, false);
-        camera->Transform((*vertexes)[i + 2], v3_, false);
+        Light *l = lights[0];
         
-        this->draw_triangle(v1_, v2_, v3_, m->getTexture()/*COLOR_GREEN*/);
+        const double kq = 2;
+        const double kd = 3;
+        
+        i1 = l->it * kd * get_cos_angle(m->v1.norm, m->v1, l->x, l->y, l->z) / (kq + dist(m->v1, l->x, l->y, l->z));
+        i2 = l->it * kd * get_cos_angle(m->v2.norm, m->v2, l->x, l->y, l->z) / (kq + dist(m->v2, l->x, l->y, l->z));
+        i3 = l->it * kd * get_cos_angle(m->v3.norm, m->v3, l->x, l->y, l->z) / (kq + dist(m->v3, l->x, l->y, l->z));
     }
     
+    Point v1_, v2_, v3_;
+    int32_t visibles = 0;
+    
+    visibles += camera->Transform(m->v1, v1_, true) ? 0 : 1;
+    visibles += camera->Transform(m->v2, v2_, true) ? 0 : 1;
+    visibles += camera->Transform(m->v3, v3_, true) ? 0 : 1;
+    if (visibles >= 3)
+        return false;
+    
+    this->draw_triangle(v1_, v2_, v3_, fabs(i1), fabs(i2), fabs(i3), m->getTexture());
     return true;
 }
 
@@ -226,20 +253,24 @@ void Renderer::update(Camera *camera)
     Point v1_, v2_;
     for (auto l = lines.begin(); l < lines.end(); ++l)
     {
-        if (!camera->Transform((*l).v1, v1_, true))
+        if (!camera->Transform((*l).v1, v1_, false))
             continue;
         
-        if (!camera->Transform((*l).v2, v2_, true))
+        if (!camera->Transform((*l).v2, v2_, false))
             continue;
         
         this->draw_line(v1_, v2_, (*l).color);
     }
+    
+    for (auto light = lights.begin(); light < lights.end(); ++light)
+    {
+        assert(*light != nullptr);
+        this->draw_model(camera, (*light)->get_model());
+    }
 }
 
 void Renderer::projection(Point &dot)
-{
-    
-}
+{}
 
 bool Renderer::is_light()
 {

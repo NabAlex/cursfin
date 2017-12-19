@@ -4,6 +4,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "scen_controller.h"
+#include "scalar_field.h"
 
 class EasySceneController : public SceneController
 {

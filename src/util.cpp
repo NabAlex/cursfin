@@ -41,3 +41,14 @@ void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out)
     multi_vect(v1, v2, out);
     out.normalize();
 }
+
+double clamp(double a, double left, double right)
+{
+    if (a < left)
+        return left;
+    
+    if (a > right)
+        return right;
+    
+    return a;
+}

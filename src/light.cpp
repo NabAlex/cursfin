@@ -1,14 +1,26 @@
 #include "light.h"
 
-Light::Light(double x, double y, double z) : x(x), y(y), z(z)
-{}
+Light::Light(double it, double x, double y, double z) : it(it), x(x), y(y), z(z)
+{
+    Point v1(x, y, z, COLOR_RED), v2(x + 1, y + 1, z + 1, COLOR_YELLOW), v3(x + 1, y, z + 1, COLOR_YELLOW);
+    light_model = new Model(v1, v2, v3);
+}
 
 Light::~Light()
-{}
+{
+    delete light_model;
+}
 
 Light::Light(const Light &src)
 {
+    this->it = src.it;
+    
     this->x = src.x;
     this->y = src.y;
     this->z = src.z;
+}
+
+Model *Light::get_model()
+{
+    return light_model;
 }

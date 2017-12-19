@@ -27,8 +27,6 @@ public:
     Renderer render;
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
-    
-    // void pixie(int x, int y);
 private:
     const Cairo::RefPtr<Cairo::Context> *cr;
 };

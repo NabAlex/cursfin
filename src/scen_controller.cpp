@@ -1,7 +1,7 @@
 #include <gdkmm.h>
 #include "scen_controller.h"
 
-Point eye(0, 40, 5), center(0, 0, 5), up(0, 0, -1);
+Point eye(0, 20, 5), center(0, 0, 5), up(0, 0, -1);
 
 SceneController::SceneController(int width, int height) : BaseDrawer(width, height), render(this), cr(nullptr)
 {

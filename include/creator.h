@@ -2,36 +2,33 @@
 #define CURSFIN_CREATOR_H
 
 #include <random>
+#include <vector>
 
 #include "texture.h"
 
 #include "util.h"
 #include "model.h"
 #include "perlin_noise.h"
+#include "scalar_field.h"
 
 class Creator
 {
 public:
-    Creator(size_t max_polygons, unsigned int seed);
+    vector<Model*> models;
+    
+    Creator(unsigned int seed);
     ~Creator();
     
-    void setProperty(int width, int height);
+    void set_property(int width, int height);
     
-    void Generate();
-    Model **GetModels();
-    size_t SizeModels();
+    void generate(int32_t level_z, int32_t inv);
     
-    bool isGenerated();
+    bool is_generated();
 private:
     bool generated;
-    Model *m;
-    
-    Model **models;
-    size_t models_size;
-    
-    size_t max_polygons;
     
     int w, h;
+    unsigned int seed;
 };
 
 #endif //CURSFIN_CREATOR_H

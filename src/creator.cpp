@@ -1,19 +1,16 @@
 #include <creator.h>
 
-#define WIDTH   4
-#define HEIGHT  8
+#define WIDTH   50
+#define HEIGHT  50
 
 static Point generate_vertex()
 {
     return Point(rand() % 10, rand() % 10, rand() % 10);
 }
 
-Creator::Creator(size_t max_polygons, unsigned int seed)
+Creator::Creator(unsigned int seed)
 {
-    models = new Model*[max_polygons * 20];
-    this->max_polygons = 0;
-    
-    srand(seed);
+    this->seed = seed;
     
     this->w = WIDTH;
     this->h = HEIGHT;
@@ -21,7 +18,6 @@ Creator::Creator(size_t max_polygons, unsigned int seed)
 
 Creator::~Creator()
 {}
-
 
 static Point point1, point2;
 static Model *next_node(Point new_point)
@@ -32,98 +28,47 @@ static Model *next_node(Point new_point)
     return m;
 }
 
-void Creator::Generate()
+void Creator::generate(int32_t level_z, int32_t inv)
 {
-    // PerlinNoise
+    Texture *texture = new StoneTexture(1024, 128);
+    ScalarField scalar_field(SCALAR_CAVE_RANDOM, 0, 5, this->w);
     
-    Texture *texture = new StoneTexture(1024, 32);
+    double u = 0., v = 0., du = 1. / this->w, dv = 1. / this->w;
     
-    size_t index_polygon = 0;
-//    models[index_polygon++] = new Model(
-//        Point(0, 0, 0, 0, 0),
-//        Point(0, 0, 10, 1, 0),
-//        Point(10, 0, 0, 0, 1),
-//        texture
-//    );
-//
-//    models[index_polygon++] = new Model(
-//        Point(10, 0, 0, 0, 1),
-//        Point(0, 0, 10, 1, 0),
-//        Point(10, 0, 10, 0, 1),
-//        texture
-//    );
-    
-    
-    models_size = index_polygon;
-    
-    /*
-    
-    for (int j = 0; j < 20; ++j)
+    double **map = scalar_field.field;
+    for (int32_t y = 0; y < this->h - 1; ++y)
     {
-        point1 = Point(0, j, 0);
-        point2 = Point(1, j + 1, 0);
-    
-        double z = 0, x = 1;
-        
-        int ylevel = j;
-        int y = 1;
-    
-        int xvisor = 1, zvisor = 1;
-    
-        for (int i = 0; i < 20; ++i)
+        for (int32_t x = 0; x < this->w - 1; ++x)
         {
-            z += zvisor;
-            x += xvisor;
-            models[index_polygon++] = next_node(Point(x, ylevel + y, z));
-        
-            y = (y + 1) % 2;
-        
-            if (x > this->w)
-            {
-                xvisor = -1;
-            }
-        
-            if (z > this->h)
-            {
-                zvisor = -1;
-            }
-        
-            if (x < -this->w)
-            {
-                xvisor = 1;
-            }
+            /* create triangle */
+            // 2 -- 1
+            //  ----
+            // 4 -- 3
+            /*******************/
+            Point v1(x, y, level_z + inv * map[x][y], u, v);
+            Point v2(x + 1, y, level_z + inv * map[x + 1][y], u, v + dv);
+            Point v3(x, y + 1, level_z + inv * map[x][y + 1], u + du, v);
+            Point v4(x + 1, y + 1, level_z + inv * map[x + 1][y + 1], u + du, v + dv);
+            
+            models.push_back(new Model(v1, v2, v4, texture));
+            models.push_back(new Model(v1, v3, v4, texture));
+            
+            v += dv;
         }
         
+        v = 0.;
+        u += du;
     }
-    */
-//    Model *raw = new Model();
-//    raw->addVertex(generate_vertex());
-//    raw->addVertex(generate_vertex());
-//    raw->addVertex(generate_vertex());
-//
-//    int c[] = {0, 1, 2};
-//    raw->addConnection(c, 3);
-//    this->m = raw;
-    
+
     generated = true;
 }
 
-Model **Creator::GetModels()
-{
-    return this->models;
-}
-
-size_t Creator::SizeModels()
-{
-    return this->models_size;
-}
-
-bool Creator::isGenerated()
+bool Creator::is_generated()
 {
     return this->generated;
 }
 
-void Creator::setProperty(int width, int height)
+void Creator::set_property(int width, int height)
 {
     this->w = width;
     this->h = height;

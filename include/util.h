@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdint-gcc.h>
 #include <random>
+#include <iostream>
 
 using namespace std;
 
@@ -19,8 +20,11 @@ inline color_t color_pack(int32_t r, int32_t g, int32_t b)
 }
 
 #define COLOR_UNPACK_R(c) ((c) & 0xFF)
-#define COLOR_UNPACK_G(c) ((c >> 8) & 0xFF)
-#define COLOR_UNPACK_B(c) ((c >> 16) & 0xFF)
+#define COLOR_UNPACK_G(c) (((c) >> 8) & 0xFF)
+#define COLOR_UNPACK_B(c) (((c) >> 16) & 0xFF)
+
+#define COLOR_MULTI(c, k) color_pack(((c) & 0xFF) * (k), (((c) >> 8) & 0xFF) * (k), (((c) >> 16) & 0xFF) * (k))
+#define COLOR_MULTI_SAFE(min, c, k) color_pack(min(240, (int32_t) (((c) & 0xFF) * (k))), min(240, (int32_t) ((((c) >> 8) & 0xFF) * (k))), min(240, (int32_t) ((((c) >> 16) & 0xFF) * (k))))
 
 #define COLOR_PACK(r, g, b) color_pack((r), (g), (b))
 
@@ -30,6 +34,8 @@ inline color_t color_pack(int32_t r, int32_t g, int32_t b)
 #define COLOR_RED color_pack(255, 0, 0)
 #define COLOR_GREEN color_pack(0, 255, 0)
 #define COLOR_BLUE color_pack(0, 0, 255)
+
+#define COLOR_YELLOW color_pack(255, 255, 0)
 
 #define IN_INTERVAL(x, a, b) (((x) <= (b)) && ((x) >= (a)))
 
@@ -75,6 +81,11 @@ struct Vec3 {
     Vec2<T> toVec2()
     {
         return Vec2<T>(x, y);
+    }
+    
+    void to_string(char *str)
+    {
+        std::cout << str << " (" << x << ", " << y << ", " << z << ")" << std::endl;
     }
 };
 
@@ -230,20 +241,9 @@ public:
     color_t color;
 };
 
-//double distance(Point &A, Point &B, Point &X) {
-//    Vec3d V;
-//    multi_vect(A - X, A - B, V);
-//    double S = sqrt(V.x * V.x + V.y * V.y + V.z * V.z);
-//
-//    return S;
-//    V = A - B;
-//
-//    double L = sqrt(V.x * V.x + V.y * V.y + V.z * V.z);
-//    double d = S / L;
-//    return d;
-//}
-
 void multi_vect(const Vec3d &A, const Vec3d &B, Vec3d &out);
 void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out);
+
+double clamp(double a, double left, double right);
 
 #endif //CURSFIN_UTIL_H
