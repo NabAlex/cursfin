@@ -1,15 +1,16 @@
 #include "scalar_field.h"
 
 ScalarField::ScalarField(scalar_t scalar_type,
+        unsigned int seed,
         double min_value,
         double max_value,
         int32_t size)
 {
-    const PerlinNoise perlin(time(0));
+    const PerlinNoise perlin(seed);
     const double fx = size / 20;
     const double fy = size / 20;
     
-    int octaves = 10;
+    int octaves = 2;
     
     field = new double*[size];
     for (int32_t i = 0; i < size; ++i)
@@ -25,7 +26,7 @@ ScalarField::ScalarField(scalar_t scalar_type,
 ScalarField::~ScalarField()
 {
     for (int32_t i = 0; i < size; ++i)
-        delete[] field;
+        delete[] field[i];
     
     delete field;
 }

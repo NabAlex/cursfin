@@ -38,7 +38,9 @@ set(SOURCE_FILES main.cpp
         src/light.cpp
 
         include/scalar_field.h
-        src/scalar_field.cpp)
+        src/scalar_field.cpp
+
+        include/object.h)
 
 add_executable(cursfin ${SOURCE_FILES})
 target_link_libraries(cursfin

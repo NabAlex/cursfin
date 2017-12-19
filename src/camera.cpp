@@ -17,19 +17,19 @@ Camera::Camera(const Point &eye, const Point &center, const Point &up, double XZ
     this->far = far;
     this->near = near;
     
-    ReCalcMatrix();
+    re_calc_matrix();
 }
 
 
-bool Camera::Transform(Point &dot, Point &out, bool continue_anyway)
+bool Camera::transform(Point &dot, Point &out, bool continue_anyway)
 {
     bool res = true;
     
     out = dot;
     Point &result = out;
     
-    CameraPort(result);
-    PProjection(result);
+    camera_port(result);
+    pprojection(result);
     
     result.w = fabs(result.w);
     
@@ -59,12 +59,12 @@ bool Camera::Transform(Point &dot, Point &out, bool continue_anyway)
     // result.z /= result.w;
     result.w = 1;
     
-    ToScreen(result);
+    to_screen(result);
     
     return res;
 }
 
-void Camera::Reverse(double matr[4][4]) {
+void Camera::reverse(double **matr) {
     double det = matr[0][0] * matr[1][1] * matr[2][2] - matr[0][0] * matr[1][2] * matr[2][1]
         - matr[0][1] * matr[1][0] * matr[2][2] + matr[0][1] * matr[1][2] * matr[2][0]
         + matr[0][2] * matr[1][0] * matr[2][1] - matr[0][2] * matr[1][1] * matr[2][0];
@@ -83,7 +83,7 @@ void Camera::Reverse(double matr[4][4]) {
 }
 
 
-void Camera::MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[4][4])) {
+void Camera::multi_matrix(double **matrix1, double **matrix2, double(**res)) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             for (int r = 0; r < 4; r++)
@@ -91,7 +91,7 @@ void Camera::MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[
 }
 
 
-void Camera::MultiDot(Point &V, double matrix[4][4]) {
+void Camera::multi_dot(Point &V, double matrix[4][4]) {
     Point new_dot = V;
     new_dot.x = matrix[0][0] * V.x + matrix[1][0] * V.y + matrix[2][0] * V.z + matrix[3][0] * V.w;
     new_dot.y = matrix[0][1] * V.x + matrix[1][1] * V.y + matrix[2][1] * V.z + matrix[3][1] * V.w;
@@ -100,7 +100,7 @@ void Camera::MultiDot(Point &V, double matrix[4][4]) {
     V = new_dot;
 }
 
-void Camera::SetPProjMatrix() {
+void Camera::set_pproj_matrix() {
     double right = tan(XZangle / 2);
     double left = -right;
     
@@ -128,17 +128,17 @@ void Camera::SetPProjMatrix() {
 }
 
 
-void Camera::CameraPort(Point &target) {
+void Camera::camera_port(Point &target) {
     
     target.x -= Eye.x;
     target.y -= Eye.y;
     target.z -= Eye.z;
     
-    MultiDot(target, Minv);
+    multi_dot(target, Minv);
 }
 
 
-Point Camera::MultiVect(const Point &A, const Point &B) {
+Point Camera::multi_vect(const Point &A, const Point &B) {
     Point Temp;
     Temp.x = A.y*B.z - A.z*B.y;
     Temp.y = A.z*B.x - A.x*B.z;
@@ -146,14 +146,14 @@ Point Camera::MultiVect(const Point &A, const Point &B) {
     return Temp;
 }
 
-void Camera::SetViewMatrix() {
+void Camera::set_view_matrix() {
     Point VectZ = (Center - Eye);
     VectZ.normalize();
     
-    Point VectX = MultiVect(Up, VectZ);
+    Point VectX = multi_vect(Up, VectZ);
     VectX.normalize();
     
-    Point VectY = MultiVect(VectZ, VectX);
+    Point VectY = multi_vect(VectZ, VectX);
     VectY.normalize();
     
     Minv[0][0] = VectX.x;
@@ -170,17 +170,17 @@ void Camera::SetViewMatrix() {
 }
 
 
-void Camera::ReCalcMatrix() {
-    SetScreenMatrix();
-    SetPProjMatrix();
-    SetViewMatrix();
+void Camera::re_calc_matrix() {
+    set_screen_matrix();
+    set_pproj_matrix();
+    set_view_matrix();
 }
 
-void Camera::PProjection(Point &target) {
-    MultiDot(target, ViewPort);
+void Camera::pprojection(Point &target) {
+    multi_dot(target, ViewPort);
 }
 
-void  Camera::SetScreenMatrix() {
+void  Camera::set_screen_matrix() {
     Screen[0][0] = double(width - 1) / 2;
     Screen[1][1] = double(heigth - 1) / 2;
     Screen[2][2] = 1;
@@ -190,24 +190,24 @@ void  Camera::SetScreenMatrix() {
 }
 
 
-void  Camera::ToScreen(Point &target) {
-    MultiDot(target, Screen);
+void  Camera::to_screen(Point &target) {
+    multi_dot(target, Screen);
 }
 
-void Camera::MoveTo(double x, double y, double z) {
+void Camera::move_to(double x, double y, double z) {
     Center = Point(x + Center.x - Eye.x, y + Center.y - Eye.y, z + Center.z - Eye.z);
     Eye = Point(x, y, z);
-    SetViewMatrix();
+    set_view_matrix();
 }
 
-void Camera::MoveOn(double dx, double dy, double dz) {
+void Camera::move_on(double dx, double dy, double dz) {
     Point VectZ = (Center - Eye);
     VectZ.normalize();
     
-    Point VectX = MultiVect(Up, VectZ);
+    Point VectX = multi_vect(Up, VectZ);
     VectX.normalize();
     
-    Point VectY = MultiVect(VectZ, VectX);
+    Point VectY = multi_vect(VectZ, VectX);
     VectY.normalize();
     
     VectY = VectY * dy;
@@ -219,10 +219,10 @@ void Camera::MoveOn(double dx, double dy, double dz) {
     Eye = Eye + Vect;
     Center = Center + Vect;
     
-    SetViewMatrix();
+    set_view_matrix();
 }
 
-void Camera::RotateX(double phi) {
+void Camera::rotate_x(double phi) {
     double matrix[4][4] = {
         { 1, 0, 0, 0 },
         { 0, cos(phi), sin(phi), 0 },
@@ -233,17 +233,17 @@ void Camera::RotateX(double phi) {
     Center.x -= Eye.x;
     Center.y -= Eye.y;
     Center.z -= Eye.z;
-    MultiDot(Center, matrix);
+    multi_dot(Center, matrix);
     Center.x += Eye.x;
     Center.y += Eye.y;
     Center.z += Eye.z;
     
-    MultiDot(Up, matrix);
+    multi_dot(Up, matrix);
     
-    SetViewMatrix();
+    set_view_matrix();
 }
 
-void Camera::RotateY(double phi) {
+void Camera::rotate_y(double phi) {
     double matrix[4][4] = {
         { cos(phi), 0, -sin(phi), 0 },
         { 0, 1, 0, 0 },
@@ -254,17 +254,17 @@ void Camera::RotateY(double phi) {
     Center.x -= Eye.x;
     Center.y -= Eye.y;
     Center.z -= Eye.z;
-    MultiDot(Center, matrix);
+    multi_dot(Center, matrix);
     Center.x += Eye.x;
     Center.y += Eye.y;
     Center.z += Eye.z;
     
-    MultiDot(Up, matrix);
+    multi_dot(Up, matrix);
     
-    SetViewMatrix();
+    set_view_matrix();
 }
 
-void Camera::RotateZ(double phi) {
+void Camera::rotate_z(double phi) {
     double matrix[4][4] = {
         { cos(phi), sin(phi), 0, 0 },
         { -sin(phi), cos(phi), 0, 0 },
@@ -276,19 +276,25 @@ void Camera::RotateZ(double phi) {
     Center.x -= Eye.x;
     Center.y -= Eye.y;
     Center.z -= Eye.z;
-    MultiDot(Center, matrix);
+    multi_dot(Center, matrix);
     Center.x += Eye.x;
     Center.y += Eye.y;
     Center.z += Eye.z;
     
-    MultiDot(Up, matrix);
-    SetViewMatrix();
+    multi_dot(Up, matrix);
+    set_view_matrix();
 }
 
-double Camera::getFar() {
+double Camera::get_far() {
     return far;
 }
 
-double Camera::getNear() {
+double Camera::get_near() {
     return near;
 }
+
+Point Camera::get_me()
+{
+    return Point(Eye.x, Eye.y, Eye.z);
+}
+

@@ -208,8 +208,11 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buf
 {
     CHECK_ZBUFFER();
     
+    if (!m->visibility)
+        return false;
+    
     double i1 = 1, i2 = 1, i3 = 1;
-    if (is_light() && m->v1.norm && m->v2.norm && m->v3.norm)
+    if (is_light() && lights[0]->enable && m->v1.norm && m->v2.norm && m->v3.norm)
     {
         Light *l = lights[0];
         
@@ -224,9 +227,9 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buf
     Point v1_, v2_, v3_;
     int32_t visibles = 0;
     
-    visibles += camera->Transform(m->v1, v1_, true) ? 0 : 1;
-    visibles += camera->Transform(m->v2, v2_, true) ? 0 : 1;
-    visibles += camera->Transform(m->v3, v3_, true) ? 0 : 1;
+    visibles += camera->transform(m->v1, v1_, true) ? 0 : 1;
+    visibles += camera->transform(m->v2, v2_, true) ? 0 : 1;
+    visibles += camera->transform(m->v3, v3_, true) ? 0 : 1;
     if (visibles >= 3)
         return false;
     
@@ -253,10 +256,10 @@ void Renderer::update(Camera *camera)
     Point v1_, v2_;
     for (auto l = lines.begin(); l < lines.end(); ++l)
     {
-        if (!camera->Transform((*l).v1, v1_, false))
+        if (!camera->transform((*l).v1, v1_, false))
             continue;
         
-        if (!camera->Transform((*l).v2, v2_, false))
+        if (!camera->transform((*l).v2, v2_, false))
             continue;
         
         this->draw_line(v1_, v2_, (*l).color);

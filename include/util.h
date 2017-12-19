@@ -6,6 +6,7 @@
 #include <stdint-gcc.h>
 #include <random>
 #include <iostream>
+#include <stdarg.h>
 
 using namespace std;
 
@@ -242,6 +243,8 @@ public:
 };
 
 void multi_vect(const Vec3d &A, const Vec3d &B, Vec3d &out);
+
+void set_normal(Vec3d &vec, ...);
 void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out);
 
 double clamp(double a, double left, double right);

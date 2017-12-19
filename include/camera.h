@@ -14,33 +14,35 @@ public:
     Camera() = default;
     ~Camera();
     
-    // void Transform(Model *model);
-    bool Transform(Point &dot, Point &out, bool check);
+    // void transform(Model *model);
+    bool transform(Point &dot, Point &out, bool check);
     
-    void MoveTo(double x, double y, double z);
-    void MoveOn(double dx, double dy, double dz);
+    void move_to(double x, double y, double z);
+    void move_on(double dx, double dy, double dz);
     
-    void RotateX(double phi);
-    void RotateY(double phi);
-    void RotateZ(double phi);
+    void rotate_x(double phi);
+    void rotate_y(double phi);
+    void rotate_z(double phi);
     
-    double getFar();
-    double getNear();
+    double get_far();
+    double get_near();
+    
+    Point get_me();
 private:
-    void MultiDot(Point &V, double matrix[4][4]);
+    void multi_dot(Point &V, double matrix[4][4]);
     
-    void MultiMatrix(double matrix1[4][4], double matrix2[4][4], double(res[4][4]));
+    void multi_matrix(double **matrix1, double **matrix2, double(**res));
     
-    Point MultiVect(const Point &A, const Point &B);
+    Point multi_vect(const Point &A, const Point &B);
     
-    void Reverse(double matr[4][4]);
-    void CameraPort(Point &target);
-    void PProjection(Point &target);
-    void SetViewMatrix();
-    void SetPProjMatrix();
-    void SetScreenMatrix();
-    void ReCalcMatrix();
-    void ToScreen(Point &target);
+    void reverse(double **matr);
+    void camera_port(Point &target);
+    void pprojection(Point &target);
+    void set_view_matrix();
+    void set_pproj_matrix();
+    void set_screen_matrix();
+    void re_calc_matrix();
+    void to_screen(Point &target);
     
     Point Eye;
     Point Center;

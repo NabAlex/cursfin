@@ -1,10 +1,12 @@
 #ifndef CURSFIN_MODEL_H
 #define CURSFIN_MODEL_H
 
+#include "object.h"
+
 #include "util.h"
 #include "texture.h"
 
-class Model
+class Model : public Object
 {
 public:
     Point v1, v2, v3;

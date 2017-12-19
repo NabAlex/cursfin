@@ -14,6 +14,7 @@ class ScalarField
 {
 public:
     ScalarField(scalar_t scalar_type,
+            unsigned int seed,
             double min_value,
             double max_value,
             int32_t size);

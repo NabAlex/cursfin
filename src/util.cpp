@@ -34,6 +34,17 @@ void multi_vect(const Vec3d &A, const Vec3d &B, Vec3d &out) {
     out.z = A.x * B.y - A.y * B.x;
 }
 
+void set_normal(Vec3d &vec, ...)
+{
+    Point *p;
+    va_list l;
+    
+    va_start(l, vec);
+    while ((p = va_arg(l, Point *)) != NULL)
+        p->norm = vec.clone();
+    va_end(l);
+}
+
 void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out)
 {
     Vec3d v1(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);

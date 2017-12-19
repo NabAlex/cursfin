@@ -8,7 +8,6 @@ EasySceneController::EasySceneController(int width, int height) : SceneControlle
     this->signal_key_release_event().connect ( sigc::mem_fun(*this,
         &EasySceneController::on_key_press) );
     
-    
     creator.generate(0, 1);
     creator.generate(10, -1);
     
@@ -22,7 +21,11 @@ EasySceneController::EasySceneController(int width, int height) : SceneControlle
     render.add_line(lineY);
     render.add_line(lineZ);
     
-    light = new Light(LIGHT_INTENSITY_NORMAL, 1, 1, 10);
+    light = new Light(7);
+    
+    Point camera_pos = camera->get_me();
+    light->set_position(camera_pos);
+    light->set_visibility(false);
     render.add_light(light);
 }
 
@@ -36,22 +39,22 @@ void EasySceneController::on_update()
 bool EasySceneController::on_key_press(GdkEventKey* event)
 {
     if (ONLY_PRESS(event, GDK_KEY_w))
-        camera->MoveOn(0, 0, 1);
+        camera->move_on(0, 0, 1);
     else
     if (ONLY_PRESS(event, GDK_KEY_a))
-        camera->MoveOn(-1, 0, 0);
+        camera->move_on(-1, 0, 0);
     else
     if (ONLY_PRESS(event, GDK_KEY_d))
-        camera->MoveOn(1, 0, 0);
+        camera->move_on(1, 0, 0);
     else
     if (ONLY_PRESS(event, GDK_KEY_s))
-        camera->MoveOn(0, 0, -1);
+        camera->move_on(0, 0, -1);
     
     if (ONLY_PRESS(event, GDK_KEY_j))
-        camera->RotateZ(M_PI / 30);
+        camera->rotate_z(M_PI / 30);
     else
     if (ONLY_PRESS(event, GDK_KEY_k))
-        camera->RotateZ(-M_PI / 30);
+        camera->rotate_z(-M_PI / 30);
     
     if (ONLY_PRESS(event, GDK_KEY_o))
     {
@@ -76,6 +79,13 @@ bool EasySceneController::on_key_press(GdkEventKey* event)
         light->get_model()->v1.z -= 1;
         light->z -= 1;
     }
+    
+    if (ONLY_PRESS(event, GDK_KEY_c))
+    {
+        light->set_enable(!light->enable);
+    }
+    Point camera_pos = camera->get_me();
+    light->set_position(camera_pos);
     
     queue_draw();
     return false;
