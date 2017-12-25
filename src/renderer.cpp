@@ -56,7 +56,7 @@ Renderer::~Renderer()
     delete[] ZBuffer;
 }
 
-Point Renderer::MultiVect(const Point &A, const Point &B) {
+Point Renderer::multi_vect(const Point &A, const Point &B) {
     Point Temp;
     Temp.x = A.y * B.z - A.z * B.y;
     Temp.y = A.z * B.x - A.x * B.z;
@@ -204,7 +204,7 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3,
     }
 }
 
-bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buffer
+bool Renderer::draw_model(Camera *camera, Model *m, bool uselight) // TODO add camera frame_buffer
 {
     CHECK_ZBUFFER();
     
@@ -212,16 +212,22 @@ bool Renderer::draw_model(Camera *camera, Model *m) // TODO add camera frame_buf
         return false;
     
     double i1 = 1, i2 = 1, i3 = 1;
-    if (is_light() && lights[0]->enable && m->v1.norm && m->v2.norm && m->v3.norm)
+    if (uselight && m->v1.norm && m->v2.norm && m->v3.norm)
     {
-        Light *l = lights[0];
-        
-        const double kq = 2;
-        const double kd = 3;
-        
-        i1 = l->it * kd * get_cos_angle(m->v1.norm, m->v1, l->x, l->y, l->z) / (kq + dist(m->v1, l->x, l->y, l->z));
-        i2 = l->it * kd * get_cos_angle(m->v2.norm, m->v2, l->x, l->y, l->z) / (kq + dist(m->v2, l->x, l->y, l->z));
-        i3 = l->it * kd * get_cos_angle(m->v3.norm, m->v3, l->x, l->y, l->z) / (kq + dist(m->v3, l->x, l->y, l->z));
+        i1 = 0; i2 = 0; i3 = 0;
+        for (auto light = lights.begin(); light < lights.end(); ++light)
+        {
+            Light *l = *light;
+            if (!l->enable)
+                continue;
+            
+            const double kq = 2;
+            const double kd = 3;
+    
+            i1 += l->it * kd * get_cos_angle(m->v1.norm, m->v1, l->x, l->y, l->z) / (kq + dist(m->v1, l->x, l->y, l->z));
+            i2 += l->it * kd * get_cos_angle(m->v2.norm, m->v2, l->x, l->y, l->z) / (kq + dist(m->v2, l->x, l->y, l->z));
+            i3 += l->it * kd * get_cos_angle(m->v3.norm, m->v3, l->x, l->y, l->z) / (kq + dist(m->v3, l->x, l->y, l->z));
+        }
     }
     
     Point v1_, v2_, v3_;
@@ -246,11 +252,16 @@ void Renderer::update(Camera *camera)
     ZBuffer = new double[drawer->height * drawer->width];
     ResetBuffer();
     
+    bool uselight = is_light();
     
+    /* only camera */
+    if (uselight && lights.size() == 1 && !lights[0]->enable)
+        uselight = false;
+        
     for (auto m = models.begin(); m < models.end(); ++m)
     {
         assert(*m != nullptr);
-        this->draw_model(camera, *m);
+        this->draw_model(camera, *m, uselight);
     }
     
     Point v1_, v2_;
@@ -268,7 +279,10 @@ void Renderer::update(Camera *camera)
     for (auto light = lights.begin(); light < lights.end(); ++light)
     {
         assert(*light != nullptr);
-        this->draw_model(camera, (*light)->get_model());
+        if (!(*light)->visibility)
+            continue;
+        
+        this->draw_model(camera, (*light)->get_model(), false);
     }
 }
 
@@ -278,4 +292,11 @@ void Renderer::projection(Point &dot)
 bool Renderer::is_light()
 {
     return !lights.empty();
+}
+
+void Renderer::clear()
+{
+    models.clear();
+    lines.clear();
+    lights.clear();
 }

@@ -2,6 +2,7 @@
 #define CURSFIN_TEXTURE_H
 
 #include <iostream>
+
 #include "util.h"
 
 #include "perlin_noise.h"

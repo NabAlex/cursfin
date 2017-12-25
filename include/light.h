@@ -10,6 +10,8 @@ class Light : public Object
 {
 private:
     Model *light_model;
+    
+    void set_model(double x, double y, double z);
 public:
     Light(double it);
     ~Light();

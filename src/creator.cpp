@@ -8,9 +8,9 @@ static Point generate_vertex()
     return Point(rand() % 10, rand() % 10, rand() % 10);
 }
 
-Creator::Creator(unsigned int seed)
+Creator::Creator()
 {
-    this->seed = seed;
+    this->seed = time(0);
     
     this->w = WIDTH;
     this->h = HEIGHT;
@@ -28,16 +28,20 @@ static Model *next_node(Point new_point)
     return m;
 }
 
-void Creator::generate(int32_t level_z, int32_t inv)
+void Creator::generate(int32_t level_z,
+        int32_t rise,
+        int32_t inv)
 {
     Texture *texture = new StoneTexture(1024, 128);
-    ScalarField scalar_field(SCALAR_CAVE_RANDOM, this->seed, 0, 5, this->w);
+    ScalarField scalar_field(SCALAR_CAVE_RANDOM, this->seed, 0, rise, this->w);
     
     double count_textures = 10;
     double u = 0., v = 0., du = 1. / this->w * count_textures, dv = 1. / this->w * count_textures;
     
     const double ulimit = 1. - (du / 2), vlimit = 1. - (dv / 2);
     double **map = scalar_field.field;
+    
+    double base = 1 / (double) config["quality"];
     for (int32_t y = 0; y < this->h - 1; ++y)
     {
         for (int32_t x = 0; x < this->w - 1; ++x)
@@ -47,10 +51,14 @@ void Creator::generate(int32_t level_z, int32_t inv)
             /*  ----           */
             /* 4 -- 3          */
             /*******************/
-            Point v1(x, y, level_z + inv * map[x][y], u, v);
-            Point v2(x + 1, y, level_z + inv * map[x + 1][y], u, v + dv);
-            Point v3(x, y + 1, level_z + inv * map[x][y + 1], u + du, v);
-            Point v4(x + 1, y + 1, level_z + inv * map[x + 1][y + 1], u + du, v + dv);
+            
+            double xbase = x * base, ybase = y * base;
+            double x1base = (x + 1) * base, y1base = (y + 1) * base;
+            
+            Point v1(xbase, ybase, level_z + inv * map[x][y], u, v);
+            Point v2(x1base, ybase, level_z + inv * map[x + 1][y], u, v + dv);
+            Point v3(xbase, y1base, level_z + inv * map[x][y + 1], u + du, v);
+            Point v4(x1base, y1base, level_z + inv * map[x + 1][y + 1], u + du, v + dv);
             
             Vec3d vec1, vec2;
             get_normal(v1, v2, v4, vec1);
@@ -86,4 +94,9 @@ void Creator::set_property(int width, int height)
 {
     this->w = width;
     this->h = height;
+}
+
+bool Creator::update_seed(unsigned int seed)
+{
+    this->seed = seed;
 }

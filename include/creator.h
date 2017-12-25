@@ -16,14 +16,17 @@ class Creator
 public:
     vector<Model*> models;
     
-    Creator(unsigned int seed);
+    Creator();
     ~Creator();
     
     void set_property(int width, int height);
     
-    void generate(int32_t level_z, int32_t inv);
+    void generate(int32_t level_z,
+            int32_t rise,
+            int32_t inv);
     
     bool is_generated();
+    bool update_seed(unsigned int seed);
 private:
     bool generated;
     

@@ -7,8 +7,12 @@
 #include <random>
 #include <iostream>
 #include <stdarg.h>
+#include <algorithm>
+#include <map>
 
 using namespace std;
+
+extern std::map<std::string, int32_t> config;
 
 #define SIZE_OF_ARRAY(ar) (sizeof((ar)) / sizeof(*(ar)))
 
@@ -19,6 +23,8 @@ inline color_t color_pack(int32_t r, int32_t g, int32_t b)
 {
     return (255 << 24) | (b << 16) | (g << 8) | (r);
 }
+
+#define ONLY_PRESS(event, button) ((event)->type == GDK_KEY_PRESS && (event)->keyval == (button) && !(event)->state)
 
 #define COLOR_UNPACK_R(c) ((c) & 0xFF)
 #define COLOR_UNPACK_G(c) (((c) >> 8) & 0xFF)
@@ -248,5 +254,10 @@ void set_normal(Vec3d &vec, ...);
 void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out);
 
 double clamp(double a, double left, double right);
+
+bool space(char c);
+bool notspace(char c);
+
+std::vector<std::string> split(const std::string& s);
 
 #endif //CURSFIN_UTIL_H

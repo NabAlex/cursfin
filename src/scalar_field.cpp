@@ -4,13 +4,13 @@ ScalarField::ScalarField(scalar_t scalar_type,
         unsigned int seed,
         double min_value,
         double max_value,
-        int32_t size)
+        int32_t size) : size(size)
 {
     const PerlinNoise perlin(seed);
     const double fx = size / 20;
     const double fy = size / 20;
     
-    int octaves = 2;
+    int octaves = config["octaves"];
     
     field = new double*[size];
     for (int32_t i = 0; i < size; ++i)
@@ -26,7 +26,7 @@ ScalarField::ScalarField(scalar_t scalar_type,
 ScalarField::~ScalarField()
 {
     for (int32_t i = 0; i < size; ++i)
-        delete[] field[i];
+        delete field[i];
     
-    delete field;
+    delete[] field;
 }

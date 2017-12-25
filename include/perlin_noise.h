@@ -137,34 +137,9 @@ public:
         return result;
     }
     
-    double noise0_1(double x) const
-    {
-        return noise(x) * 0.5 + 0.5;
-    }
-    
-    double noise0_1(double x, double y) const
-    {
-        return noise(x, y) * 0.5 + 0.5;
-    }
-    
-    double noise0_1(double x, double y, double z) const
-    {
-        return noise(x, y, z) * 0.5 + 0.5;
-    }
-    
-    double octaveNoise0_1(double x, std::int32_t octaves) const
-    {
-        return octaveNoise(x, octaves) * 0.5 + 0.5;
-    }
-    
     double octaveNoise0_1(double x, double y, std::int32_t octaves) const
     {
         return octaveNoise(x, y, octaves) * 0.5 + 0.5;
-    }
-    
-    double octaveNoise0_1(double x, double y, double z, std::int32_t octaves) const
-    {
-        return octaveNoise(x, y, z, octaves) * 0.5 + 0.5;
     }
 };
 

@@ -46,8 +46,6 @@ public:
     int height;
     
     color_t *frame_buffer;
-    
-    // Pixie **frame_buffer;
 };
 
 #endif //CURSFIN_BASE_DRAWER_H

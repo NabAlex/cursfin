@@ -60,7 +60,7 @@ StoneTexture::StoneTexture(size_t generate_size, size_t fill_w) : Texture(genera
         for (int32_t j = 0; j < fill_count_width; ++j)
         {
             double t = perlin.octaveNoise0_1(i / fx, j / fy, octaves);
-            color_t now_color = COLOR_PACK(t * 150, t * 150, t * 150);
+            color_t now_color = COLOR_PACK(t * config["red"], t * config["green"], t * config["blue"]);
             
             // color_t now_color = COLOR_PACK(50, 50, 50);
             
