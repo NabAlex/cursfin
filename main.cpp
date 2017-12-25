@@ -54,28 +54,5 @@ int main(int argc, char *argv[])
     EasySceneController main_scene(w, h);
     window.addController(main_scene);
 
-//    int x = 9, y = 9;jjj
-//    Gtk::TextView text_view;
-//    text_view.set_editable(true);
-//    text_view.set_size_request(x, y);
-//
-//    Gtk::Allocation al = text_view.get_allocation();
-//    al.set_width(10);
-//    al.set_height(10);
-//
-//    text_view.set_allocation(al);
-//
-//
-//    text_view.set_size_request(x, y);
-//
-//    auto buffer = text_view.get_buffer();
-//    buffer->set_text("text");
-//
-//    window.add(text_view);
-//
-//
-//    text_view.show();
-    
-    
     return app->run(window);
 }

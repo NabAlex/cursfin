@@ -59,30 +59,6 @@ bool EasySceneController::on_key_press(GdkEventKey* event)
     else
     if (ONLY_PRESS(event, GDK_KEY_k))
         camera->rotate_z(-M_PI / 30);
-    
-//    if (ONLY_PRESS(event, GDK_KEY_o))
-//    {
-//        light->get_model()->v1.x += 1;
-//        light->x += 1;
-//    }
-//    else
-//    if (ONLY_PRESS(event, GDK_KEY_p))
-//    {
-//        light->get_model()->v1.x -= 1;
-//        light->x -= 1;
-//    }
-//    else
-//    if (ONLY_PRESS(event, GDK_KEY_i))
-//    {
-//        light->get_model()->v1.z += 1;
-//        light->z += 1;
-//    }
-//    else
-//    if (ONLY_PRESS(event, GDK_KEY_u))
-//    {
-//        light->get_model()->v1.z -= 1;
-//        light->z -= 1;
-//    }
 
     if (ONLY_PRESS(event, GDK_KEY_c))
     {

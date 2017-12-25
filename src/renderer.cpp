@@ -204,11 +204,20 @@ void Renderer::draw_triangle(Point &v1, Point &v2, Point &v3,
     }
 }
 
-bool Renderer::draw_model(Camera *camera, Model *m, bool uselight) // TODO add camera frame_buffer
+bool Renderer::draw_model(Camera *camera, Model *m, bool uselight)
 {
     CHECK_ZBUFFER();
     
     if (!m->visibility)
+        return false;
+    
+    Point v1_, v2_, v3_;
+    int32_t visibles = 0;
+    
+    visibles += camera->transform(m->v1, v1_, true) ? 0 : 1;
+    visibles += camera->transform(m->v2, v2_, true) ? 0 : 1;
+    visibles += camera->transform(m->v3, v3_, true) ? 0 : 1;
+    if (visibles >= 3)
         return false;
     
     double i1 = 1, i2 = 1, i3 = 1;
@@ -223,21 +232,12 @@ bool Renderer::draw_model(Camera *camera, Model *m, bool uselight) // TODO add c
             
             const double kq = 2;
             const double kd = 3;
-    
+            
             i1 += l->it * kd * get_cos_angle(m->v1.norm, m->v1, l->x, l->y, l->z) / (kq + dist(m->v1, l->x, l->y, l->z));
             i2 += l->it * kd * get_cos_angle(m->v2.norm, m->v2, l->x, l->y, l->z) / (kq + dist(m->v2, l->x, l->y, l->z));
             i3 += l->it * kd * get_cos_angle(m->v3.norm, m->v3, l->x, l->y, l->z) / (kq + dist(m->v3, l->x, l->y, l->z));
         }
     }
-    
-    Point v1_, v2_, v3_;
-    int32_t visibles = 0;
-    
-    visibles += camera->transform(m->v1, v1_, true) ? 0 : 1;
-    visibles += camera->transform(m->v2, v2_, true) ? 0 : 1;
-    visibles += camera->transform(m->v3, v3_, true) ? 0 : 1;
-    if (visibles >= 3)
-        return false;
     
     this->draw_triangle(v1_, v2_, v3_, fabs(i1), fabs(i2), fabs(i3), m->getTexture());
     return true;
