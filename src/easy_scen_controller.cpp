@@ -9,7 +9,7 @@ static void default_set_config(std::map<std::string, int32_t> &config)
 {
     config["osi"] = 0;
     
-    config["intensity"] = 7;
+    config["intensity"] = 13;
     
     config["red"] = 150;
     config["green"] = 150;

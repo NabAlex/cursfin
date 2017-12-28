@@ -53,7 +53,6 @@ void get_normal(Point &p1, Point &p2, Point &p3, Vec3d &out)
     Vec3d v2(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z);
     multi_vect(v1, v2, out);
     out.normalize();
-    out.to_string("lol");
 }
 
 double clamp(double a, double left, double right)
