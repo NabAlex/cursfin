@@ -19,7 +19,7 @@ ScalarField::ScalarField(scalar_t scalar_type,
         
         if (scalar_type == SCALAR_CAVE_RANDOM)
             for (int32_t j = 0; j < size; ++j)
-                field[i][j] = min_value + perlin.octaveNoise0_1(i / fx, j / fy, octaves) * max_value;
+                field[i][j] = min_value + perlin.octaveNoiseCave(i / fx, j / fy, octaves) * max_value;
     }
 }
 

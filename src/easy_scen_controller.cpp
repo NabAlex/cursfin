@@ -139,8 +139,6 @@ void EasySceneController::pass_render()
     for (int i = 0; i < creator.models.size(); ++i)
         render.add_model(creator.models[i]);
     
-    render.add_rectangle(Point(0, 0, 0), Point(0, 0, 10), Point(0, 100, 10), Point(0, 100, 0));
-    
     if (config["osi"])
     {
         Line lineX(Point(0, 0, 0), Point(10, 0, 0), COLOR_RED);

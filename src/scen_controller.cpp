@@ -21,6 +21,7 @@ SceneController::~SceneController()
 bool SceneController::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     double padding_y = 0;
+    
     /* init scen */
     if (insert_mode)
     {

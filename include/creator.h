@@ -27,8 +27,13 @@ public:
             int32_t inv);
     
     bool is_generated();
-    bool update_seed(unsigned int seed);
+    void update_seed(unsigned int seed);
 private:
+    void get_point_normal(ScalarField &scalarField,
+            int32_t x, int32_t y,
+            double base,
+            Vec3d &out);
+    
     bool generated;
     
     int w, h;

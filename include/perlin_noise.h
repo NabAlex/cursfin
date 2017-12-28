@@ -14,7 +14,8 @@ private:
     
     static double Fade(double t) noexcept
     {
-        return t * t * t * (t * (t * 6 - 15) + 10);
+        return t;
+        // return t * t * t * (t * (t * 6 - 15) + 10);
     }
     
     static double Lerp(double t, double a, double b) noexcept
@@ -88,22 +89,7 @@ public:
                 Lerp(u, Grad(p[AB + 1], x, y - 1, z - 1),
                     Grad(p[BB + 1], x - 1, y - 1, z - 1))));
     }
-    
-    double octaveNoise(double x, std::int32_t octaves) const
-    {
-        double result = 0.0;
-        double amp = 1.0;
-        
-        for (std::int32_t i = 0; i < octaves; ++i)
-        {
-            result += noise(x) * amp;
-            x *= 2.0;
-            amp *= 0.5;
-        }
-        
-        return result;
-    }
-    
+
     double octaveNoise(double x, double y, std::int32_t octaves) const
     {
         double result = 0.0;
@@ -120,26 +106,14 @@ public:
         return result;
     }
     
-    double octaveNoise(double x, double y, double z, std::int32_t octaves) const
-    {
-        double result = 0.0;
-        double amp = 1.0;
-        
-        for (std::int32_t i = 0; i < octaves; ++i)
-        {
-            result += noise(x, y, z) * amp;
-            x *= 2.0;
-            y *= 2.0;
-            z *= 2.0;
-            amp *= 0.5;
-        }
-        
-        return result;
-    }
-    
-    double octaveNoise0_1(double x, double y, std::int32_t octaves) const
+    double octaveNoiseTexture(double x, double y, std::int32_t octaves) const
     {
         return octaveNoise(x, y, octaves) * 0.5 + 0.5;
+    }
+    
+    double octaveNoiseCave(double x, double y, std::int32_t octaves) const
+    {
+        return octaveNoise(x, y, octaves) * 1 + 0.5;
     }
 };
 

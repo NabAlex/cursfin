@@ -61,13 +61,17 @@ void Creator::generate(int32_t level_z,
             Point v3(xbase, y1base, level_z + inv * map[x][y + 1], u + du, v);
             Point v4(x1base, y1base, level_z + inv * map[x + 1][y + 1], u + du, v + dv);
             
-            Vec3d vec1, vec2;
-            get_normal(v1, v2, v4, vec1);
-            set_normal(vec1, v1, v2, v4, NULL);
+            Vec3d vec1, vec2, vec3, vec4;
+            get_point_normal(scalar_field, x, y, base, vec1);
+            get_point_normal(scalar_field, x + 1, y, base, vec2);
+            get_point_normal(scalar_field, x, y + 1, base, vec3);
+            get_point_normal(scalar_field, x + 1, y + 1, base, vec4);
             
-            get_normal(v1, v3, v4, vec2);
-            set_normal(vec2, v1, v3, v4, NULL);
-            
+            set_normal(vec1, v1, NULL);
+            set_normal(vec2, v2, NULL);
+            set_normal(vec3, v3, NULL);
+            set_normal(vec4, v4, NULL);
+    
             models.push_back(new Model(v1, v2, v4, texture));
             models.push_back(new Model(v1, v3, v4, texture));
     
@@ -97,7 +101,36 @@ void Creator::set_property(int width, int height)
     this->h = height;
 }
 
-bool Creator::update_seed(unsigned int seed)
+void Creator::update_seed(unsigned int seed)
 {
     this->seed = seed;
+}
+
+void Creator::get_point_normal(ScalarField &scalarField,
+        int32_t x, int32_t y,
+        double base,
+        Vec3d &out)
+{
+    if (x <= 0 || y <= 0 || x >= this->w - 1 || y >= this->w - 1)
+    {
+        out = Vec3d();
+        return;
+    }
+    
+    double xbase = x * base; double ybase = y * base;
+    
+    Point v = Point(xbase, ybase, scalarField.field[x][y]);
+    Point v1 = Point((x + 1) * base, y * base, scalarField.field[x + 1][y]);
+    Point v2 = Point((x - 1) * base, y * base, scalarField.field[x - 1][y]);
+    
+    Point v3 = Point(x * base, (y + 1) * base, scalarField.field[x][y + 1]);
+    Point v4 = Point(x * base, (y - 1) * base, scalarField.field[x][y - 1]);
+    
+    Vec3d vec12, vec23, vec34, vec14;
+    get_normal(v, v1, v2, vec12);
+    get_normal(v, v2, v3, vec23);
+    get_normal(v, v3, v4, vec34);
+    get_normal(v, v1, v4, vec14);
+    
+    out = (vec12 + vec23 + vec34 + vec14) * ((double) 1 / 4);
 }

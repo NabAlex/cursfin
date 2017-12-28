@@ -17,7 +17,9 @@ public:
         this->height = h;
         
         this->_size = this->width * this->height * sizeof(color_t);
-        this->frame_buffer = new color_t[this->width * this->height];
+        this->frame_buffer = new color_t[this->_size];
+    
+        refresh_frame();
     }
     
     ~BaseDrawer()
@@ -27,7 +29,8 @@ public:
     
     void refresh_frame()
     {
-        memset(this->frame_buffer, 255, this->_size);
+        for (int32_t i = 0; i < this->_size; ++i)
+            this->frame_buffer[i] = COLOR_PACK(20, 20, 20);
     }
     
     void pixie(int x, int y, color_t rgb)
