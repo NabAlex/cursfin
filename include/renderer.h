@@ -31,6 +31,8 @@ public:
     void add_model(Model *model);
     void add_line(Line line);
     void add_light(Light *light);
+    
+    void add_rectangle(Point v1, Point v2, Point v3, Point v4);
 private:
     void projection(Point &dot);
     

@@ -7,6 +7,8 @@ Light *light;
 
 static void default_set_config(std::map<std::string, int32_t> &config)
 {
+    config["osi"] = 0;
+    
     config["intensity"] = 7;
     
     config["red"] = 150;
@@ -14,7 +16,10 @@ static void default_set_config(std::map<std::string, int32_t> &config)
     config["blue"] = 150;
     
     config["height"] = 10;
-    config["rise"] = 5;
+    
+    config["risetop"] = 5;
+    config["risedown"] = 5;
+    
     config["octaves"] = 4;
     
     config["quality"] = 1;
@@ -126,18 +131,25 @@ void EasySceneController::insert_cmd(std::string message)
 void EasySceneController::pass_render()
 {
     creator.update_seed(time(0));
-    creator.generate(0, config["rise"], 1);
-    creator.generate(config["height"], config["rise"], -1);
+    creator.generate(0, config["risedown"], 0, 1);
+    
+    creator.update_seed(time(0) + 10);
+    creator.generate(config["height"], config["risetop"], 0, -1);
     
     for (int i = 0; i < creator.models.size(); ++i)
         render.add_model(creator.models[i]);
     
-    Line lineX(Point(0, 0, 0), Point(10, 0, 0), COLOR_RED);
-    Line lineY(Point(0, 0, 0), Point(0, 10, 0), COLOR_GREEN);
-    Line lineZ(Point(0, 0, 0), Point(0, 0, 10), COLOR_BLUE);
-    render.add_line(lineX);
-    render.add_line(lineY);
-    render.add_line(lineZ);
+    render.add_rectangle(Point(0, 0, 0), Point(0, 0, 10), Point(0, 100, 10), Point(0, 100, 0));
+    
+    if (config["osi"])
+    {
+        Line lineX(Point(0, 0, 0), Point(10, 0, 0), COLOR_RED);
+        Line lineY(Point(0, 0, 0), Point(0, 10, 0), COLOR_GREEN);
+        Line lineZ(Point(0, 0, 0), Point(0, 0, 10), COLOR_BLUE);
+        render.add_line(lineX);
+        render.add_line(lineY);
+        render.add_line(lineZ);
+    }
     
     light = new Light(config["intensity"]);
     

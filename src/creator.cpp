@@ -30,10 +30,11 @@ static Model *next_node(Point new_point)
 
 void Creator::generate(int32_t level_z,
         int32_t rise,
+        int32_t down,
         int32_t inv)
 {
     Texture *texture = new StoneTexture(1024, 128);
-    ScalarField scalar_field(SCALAR_CAVE_RANDOM, this->seed, 0, rise, this->w);
+    ScalarField scalar_field(SCALAR_CAVE_RANDOM, this->seed, -down, rise, this->w);
     
     double count_textures = 10;
     double u = 0., v = 0., du = 1. / this->w * count_textures, dv = 1. / this->w * count_textures;

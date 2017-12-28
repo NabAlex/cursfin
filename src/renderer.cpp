@@ -33,6 +33,13 @@ void Renderer::add_model(Model *model)
     this->models.push_back(model);
 }
 
+void Renderer::add_rectangle(Point v1, Point v2, Point v3, Point v4)
+{
+    Model *m1 = new Model(v1, v2, v3), *m2 = new Model(v1, v2, v4);
+    this->models.push_back(m1);
+    this->models.push_back(m2);
+}
+
 void Renderer::add_line(Line line)
 {
     this->lines.push_back(line);

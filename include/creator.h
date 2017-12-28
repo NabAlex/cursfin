@@ -23,6 +23,7 @@ public:
     
     void generate(int32_t level_z,
             int32_t rise,
+            int32_t down,
             int32_t inv);
     
     bool is_generated();

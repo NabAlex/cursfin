@@ -34,20 +34,9 @@ bool Camera::transform(Point &dot, Point &out, bool continue_anyway)
     result.w = fabs(result.w);
     
     if (!IN_INTERVAL(result.x, -result.w, result.w))
-    {
-        // TODO
-        // x = x0 + mt
-        // ... nt
-        // ... pt
-        // T = - (A * x1 + B * y1 + C * z1 + D) / (A * m + B * n + C * p)
-        
-        // or binary
-        
         res = false;
-    }
     if (!IN_INTERVAL(result.y, -result.w, result.w))
         res = false;
-    
     if (!IN_INTERVAL(result.z, -result.w, result.w))
         res = false;
     
